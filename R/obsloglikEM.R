@@ -36,7 +36,7 @@
 #'     selection bias adjustment.
 #' @param tol stop estimation when subsequent log-likelihood estimates are
 #'     within this value
-#' @param max maximum number of iterations of the estimation algorithm
+#' @param maxit maximum number of iterations of the estimation algorithm
 #' @return param vector with parameter estimates organized as (theta, beta)
 #' @return param.seq matrix containing estimated parameter values across
 #'     iterations of the expectation algorithm
@@ -52,8 +52,8 @@ obsloglikEM <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
     # initialise p for EM
     theta <- param_current[1:(1 + ncol(Z))]
     beta  <- param_current[-(1:(1 + ncol(Z)))]
-    pred1 <- expit(cbind(1, Z)) %*% theta)
-    pred2 <- expit(cbind(1, X)) %*% beta)
+    pred1 <- expit(cbind(1, Z) %*% theta)
+    pred2 <- expit(cbind(1, X) %*% beta)
 
     calculate.p <- function(pred1, pred2)
     {
@@ -81,8 +81,8 @@ obsloglikEM <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
         fit.theta <- stats::glm(p ~ Z, family = stats::binomial(),
                                 weights = weights)
 
-        pred1 <- predict(fit.theta, type = 'response')
-        pred2 <- predict(fit.beta, type = 'response')
+        pred1 <- stats::predict(fit.theta, type = 'response')
+        pred2 <- stats::predict(fit.beta, type = 'response')
         p     <- calculate.p(pred1, pred2)
 
         loglik <- sum(weights * Dstar * log(pred1 * pred2) +
@@ -93,9 +93,11 @@ obsloglikEM <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
         it <- it + 1
         if (abs(loglik.seq[it] - loglik.seq[it - 1]) < tol)
             converged <- TRUE
-        param.seq <- rbind(param.seq,  c(coef(fit.theta), coef(fit.beta)))
+
+        p <- c(stats::coef(fit.theta), stats::coef(fit.beta))
+        param.seq <- rbind(param.seq,  p)
     }
 
-    param <- c(coef(fit.theta), beta0_fixed, coef(fit.beta))
+    param <- c(stats::coef(fit.theta), beta0_fixed, stats::coef(fit.beta))
     list(param = param, param.seq = param.seq, loglik.seq = loglik.seq)
 }

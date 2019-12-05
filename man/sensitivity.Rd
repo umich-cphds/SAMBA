@@ -16,7 +16,7 @@ contain an intercept.}
 \item{prev}{Disease prevalence in the population or subject-specific
 \eqn{P(D|X)} in population}
 
-\item{r}{Optional marginal sampling ratio, \eqn{P(S| D) / P(S| D^c)}. Only
+\item{r}{Optional marginal sampling ratio, \eqn{P(S| D) / P(S| !D)}. Only
 one of 'r' and 'weights' can be specified. Default is `NULL`}
 
 \item{weights}{Optional vector of subject-specific weights used for
@@ -33,10 +33,10 @@ covariates X for a misclassified binary outcome.
 }
 \details{
 We are interested in modeling the relationship between binary disease status
-and covariates Z using a logistic regression model. However, D may be
-misclassified, and our observed data may not well-represent the population
-of interest. In this setting, we estimate parameters from the disease model
-using the following modeling framework.
+and covariates \eqn{Z} using a logistic regression model. However, \eqn{D}
+may be misclassified, and our observed data may not well-represent the
+population of interest. In this setting, we estimate parameters from the
+disease model using the following modeling framework.
 
 Notation:
 \describe{
@@ -55,6 +55,6 @@ Model Structure:
 \describe{
 \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
-\item{Sensitivity Model}{\deqn{logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X}}
+\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
 }
 }

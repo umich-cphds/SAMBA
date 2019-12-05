@@ -55,13 +55,18 @@ sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
 
     if (!is.numeric(Dstar))
         stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+        stop("'Dstar' must be coded 0/1.")
 
     n <- length(Dstar)
     if (n != nrow(X))
         stop("The number of rows of 'X' must match the length of 'Dstar'.")
 
-    if (!is.numeric(prev))
+    if (!is.numeric(prev) || !is.vector(prev))
         stop("'prev' must be a numeric vector.")
+
+    if (length(prev) != 1 && length(prev) != n)
+        stop("'prev' must have unit length or the same length as 'Dstar'.")
 
     if (length(prev) > 1)
         message('Using average prevalence to calculate marginal c')
@@ -72,10 +77,12 @@ sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
     if (is.null(weights)) {
         weights <- rep(1 / n, n)
     } else {
-        if (!is.numeric(weights))
+        if (length(weights) != length(Dstar))
+            stop("The length of 'weights' must match the length of 'Dstar'.")
+        if (!is.numeric(weights) || !is.vector(weights))
             stop("'weights' must be a numeric vector.")
-        if (length(weights) != n)
-            stop("'weights' must be the same length as 'Dstar'.")
+        if (any(weights < 0))
+            stop("'weights' must be nonnegative.")
     }
 
     if (is.null(r)) {
@@ -96,17 +103,17 @@ sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
                             weights = weights)
 
     starting <- c(logit(c_marg), stats::coef(fit.beta)[-1])
-    fit.sens <- try(glm(Dstar ~ X, start = starting, weights = weights,
-                        family = stats::binomial(link = modLinkprev(prevr))),
+    fit.sens <- try(stats::glm(Dstar ~ X, start = starting, weights = weights,
+                               family = stats::binomial(modLinkprev(prevr))),
                     silent = TRUE)
 
     if (class(fit.sens)[1] != "try-error") {
         c1 <- expit(cbind(1, X) %*% stats::coef(fit.sens))
     } else {
-        c1 <- predict(fit.beta, type = 'response') / prevr
+        c1 <- stats::predict(fit.beta, type = 'response') / prevr
     }
 
     c_marg <- ifelse(c_marg < 1, c_marg, NA)
     c1     <- ifelse(c1 > 1, rep(1, length(Dstar)), c1)
-    list(c_marg = c_marg, c_X = c1)
+    list(c_marg = c_marg, c_X = as.vector(c1))
 }

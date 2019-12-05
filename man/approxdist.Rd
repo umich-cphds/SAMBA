@@ -4,47 +4,53 @@
 \alias{approxdist}
 \title{approxdist}
 \usage{
-approxdist(Z, Dstar, weights = NULL, c_marg)
+approxdist(Z, Dstar, c_marg, weights = NULL)
 }
 \arguments{
-\item{Z}{matrix or data frame with covariates in disease model}
+\item{Z}{Matrix  with covariates in disease model}
 
-\item{Dstar}{matrix or data frame containing observed disease status}
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
 
-\item{weights}{(optional) vector of subject-specific weights used for selection bias adjustment.}
+\item{c_marg}{Marginal sensitivity, P(D^* | D)}
 
-\item{c_marg}{marginal sensitivity, P( observe disease | have disease )}
+\item{weights}{Optional vector of subject-specific weights used for
+selection bias adjustment. Default is NULL}
 }
 \value{
-param vector with parameter estimates for disease model (intercept, logOR of Z)
-
-variance vector of variance estimates for disease model
+a list with two elements: 'param', a vector with parameter estimates
+    for disease model(intercept, logOR of Z), and 'variance', a vector of
+    variance estimates for disease model
 }
 \description{
-This function can be used to estimate parameters in the disease model given previously-estimated marginal sensitivity. This estimation is based on approximating the distribution of Dstar given Z.
+This function can be used to estimate parameters in the disease model given
+a previously-estimated marginal sensitivity. This estimation is based on
+approximating the distribution of Dstar given Z.
 }
 \details{
-We are interested in modeling the relationship between binary disease status and covariates Z using a logistic regression model. However, D may be misclassified, and our observed data may not well-represent the population of interest. In this setting, we estimate parameters from the disease model using the following modeling framework.
+We are interested in modeling the relationship between binary disease status
+and covariates Z using a logistic regression model. However, D may be
+misclassified, and our observed data may not well-represent the population
+of interest. In this setting, we estimate parameters from the disease model
+using the following modeling framework.
 
 Notation:
-
-D = binary disease status of interest
-
-Dstar = observed binary disease status. Potentially a misclassified version of D. We assume D=0 implies Dstar=0.
-
-S = indicator for whether patient from population of interest is included in the analytical dataset
-
-Z = covariates in disease model of interest
-
-W = covariates in model for patient inclusion in analytical dataset (selection model)
-
-X = covariates in model for probability of observing disease given patient has disease (sensitivity model)
-
+\describe{
+    \item{D}{Binary disease status of interest.}
+    \item{Dstar}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{S}{Indicator for whether patient from population of interest is
+             included in the analytical dataset.}
+    \item{Z}{Covariates in disease model of interest.}
+    \item{W}{Covariates in model for patient inclusion in analytical dataset
+             (selection model).}
+    \item{X}{Covariates in model for probability of observing disease given
+             patient has disease (sensitivity model).}
+}
 Model Structure:
-
-Disease Model: logit(P(D=1|X)) = theta_0 + theta_Z Z
-
-Selection Model: P(S=1|W,D)
-
-Sensitivity Model: logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X
+\describe{
+\item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
+\item{Selection Model}{\deqn{P(S=1|W,D)}}
+\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+}
 }

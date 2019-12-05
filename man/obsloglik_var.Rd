@@ -12,15 +12,19 @@ obsloglik_var(theta, beta, X, Z, Dstar, getInfo = FALSE,
 
 \item{beta}{estimated value of beta from a call to misclass_max or misclass_maxEM}
 
-\item{X}{matrix or data frame with covariates in sensitivity model. Set to NULL to fit model with no covariates in sensitivity model.}
+\item{X}{matrix or data frame with covariates in sensitivity model. Set to
+NULL to fit model with no covariates in sensitivity model.}
 
 \item{Z}{matrix or data frame with covariates in disease model}
 
 \item{Dstar}{matrix or data frame containing observed disease status}
 
-\item{getInfo}{indicator for whether the information matrix or covariance matrix should be returned. Default is FALSE.}
+\item{getInfo}{indicator for whether the information matrix or covariance
+matrix should be returned. Default is FALSE.}
 
-\item{expectedInfo}{indicator for whether the observed or expected information matrix should be used to estimate variance. Default is the expected information matrix (TRUE).}
+\item{expectedInfo}{indicator for whether the observed or expected
+information matrix should be used to estimate variance. Default is the
+expected information matrix (TRUE).}
 }
 \value{
 Info estimated information matrix.
@@ -28,32 +32,41 @@ Info estimated information matrix.
 variance estimated covariance matrix.
 }
 \description{
-This function can be used to estimate the observed data information matrix for joint estimation of parameters in the disease and sensitivity models.
+This function can be used to estimate the observed data
+information matrix for joint estimation of parameters in the disease and
+sensitivity models.
 }
 \details{
-We are interested in modeling the relationship between binary disease status and covariates Z using a logistic regression model. However, D may be misclassified, and our observed data may not well-represent the population of interest. In this setting, we estimate parameters from the disease model using the following modeling framework.
+We are interested in modeling the relationship between binary disease status
+and covariates Z using a logistic regression model. However, D may be
+misclassified, and our observed data may not well-represent the population of
+interest. In this setting, we estimate parameters from the disease model
+using the following modeling framework.
 
 Notation:
-
-D = binary disease status of interest
-
-Dstar = observed binary disease status. Potentially a misclassified version of D. We assume D=0 implies Dstar=0.
-
-S = indicator for whether patient from population of interest is included in the analytical dataset
-
-Z = covariates in disease model of interest
-
-W = covariates in model for patient inclusion in analytical dataset (selection model)
-
-X = covariates in model for probability of observing disease given patient has disease (sensitivity model)
-
+\describe{
+    \item{D}{Binary disease status of interest.}
+    \item{Dstar}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{S}{Indicator for whether patient from population of interest is
+             included in the analytical dataset.}
+    \item{Z}{Covariates in disease model of interest.}
+    \item{W}{Covariates in model for patient inclusion in analytical dataset
+             (selection model).}
+    \item{X}{Covariates in model for probability of observing disease given
+             patient has disease (sensitivity model).}
+}
 Model Structure:
-
-Disease Model: logit(P(D=1|X)) = theta_0 + theta_Z Z
-
-Selection Model: P(S=1|W,D)
-
-Sensitivity Model: logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X
-
-This function assumes that the sensitivity model intercept was estimated rather than fixed. If it was fixed, this will produce variances that are too big. When the intercept is fixed, (1) return the information matrix, (2) remove the row/column corresponding to the fixed parameter, and (3) invert the information matrix to get the fixed-parameter covariance matrix
+\describe{
+\item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
+\item{Selection Model}{\deqn{P(S=1|W,D)}}
+\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+}
+}
+\note{
+This function assumes that the sensitivity model intercept was estimated
+rather than fixed. If it was fixed, this will produce variances that are too big.
+When the intercept is fixed, (1) return the information matrix, (2) remove the
+row/column corresponding to the fixed parameter, and (3) invert the information
+matrix to get the fixed-parameter covariance matrix
 }

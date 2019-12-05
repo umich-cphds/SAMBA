@@ -2,56 +2,68 @@
 % Please edit documentation in R/obsloglik.R
 \name{obsloglik}
 \alias{obsloglik}
-\title{obsloglik}
+\title{Calculate Observed Profile Log likelihood}
 \usage{
 obsloglik(Z, X, Dstar, param_current, beta0_fixed = NULL,
-  weights = NULL)
+  weights = NULL, itnmax = 5000)
 }
 \arguments{
-\item{Z}{matrix or data frame with covariates in disease model}
+\item{Z}{Numeric matrix with covariates in disease model}
 
-\item{X}{matrix or data frame with covariates in sensitivity model. Set to NULL to fit model with no covariates in sensitivity model.}
+\item{X}{Numeric Matrix with covariates in sensitivity model. Set to
+NULL to fit model with no covariates in sensitivity model}
 
 \item{Dstar}{matrix or data frame containing observed disease status}
 
-\item{param_current}{vector of starting values for theta and beta (theta, beta). Theta is the parameter of the disease model, and beta is the parameter of the sensitivity model.}
+\item{param_current}{vector of starting values for theta and beta (theta, beta).
+Theta is the parameter of the disease model, and beta is the parameter
+of the sensitivity model}
 
-\item{beta0_fixed}{(optional) vector of values of sensitivity model intercept to profile over. If a single value, corresponds to fixing intercept at specified value.}
+\item{beta0_fixed}{(optional) vector of values of sensitivity model intercept
+to profile over. If a single value, corresponds to fixing intercept at
+specified value}
 
-\item{weights}{(optional) vector of subject-specific weights used for selection bias adjustment.}
+\item{weights}{(optional) vector of subject-specific weights used for
+selection bias adjustment}
+
+\item{itnmax}{Maximum number of iterations to run \code{optimx}}
 }
 \value{
 param vector with parameter estimates organized as (theta, beta)
 
-param_save matrix containing estimated parameter values corresponding to different values of beta0_fixed.
+param_save matrix containing estimated parameter values corresponding
+    to different values of beta0_fixed.
 
-loglik_save vector of log-likelihood values corresponding to different values of beta0_fixed.
+loglik_save vector of log-likelihood values corresponding to
+   different values of beta0_fixed.
 }
 \description{
-This function can be used to jointly estimate disease model and sensitivity model parameters using profile likelihood methods.
+\code{obsloglik} jointly estimates the disease model and sensitivity
+model parameters using profile likelihood methods.
 }
 \details{
-We are interested in modeling the relationship between binary disease status and covariates Z using a logistic regression model. However, D may be misclassified, and our observed data may not well-represent the population of interest. In this setting, we estimate parameters from the disease model using the following modeling framework.
-
+We are interested in modeling the relationship between binary disease status
+and covariates Z using a logistic regression model. However, D may be
+misclassified, and our observed data may not well-represent the population of
+interest. In this setting, we estimate parameters from the disease model
+using the following modeling framework.
 Notation:
-
-D = binary disease status of interest
-
-Dstar = observed binary disease status. Potentially a misclassified version of D. We assume D=0 implies Dstar=0.
-
-S = indicator for whether patient from population of interest is included in the analytical dataset
-
-Z = covariates in disease model of interest
-
-W = covariates in model for patient inclusion in analytical dataset (selection model)
-
-X = covariates in model for probability of observing disease given patient has disease (sensitivity model)
-
+\describe{
+    \item{D}{Binary disease status of interest.}
+    \item{Dstar}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{S}{Indicator for whether patient from population of interest is
+             included in the analytical dataset.}
+    \item{Z}{Covariates in disease model of interest.}
+    \item{W}{Covariates in model for patient inclusion in analytical dataset
+             (selection model).}
+    \item{X}{Covariates in model for probability of observing disease given
+             patient has disease (sensitivity model).}
+}
 Model Structure:
-
-Disease Model: logit(P(D=1|X)) = theta_0 + theta_Z Z
-
-Selection Model: P(S=1|W,D)
-
-Sensitivity Model: logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X
+\describe{
+\item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
+\item{Selection Model}{\deqn{P(S=1|W,D)}}
+\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+}
 }

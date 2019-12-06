@@ -73,9 +73,9 @@ obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE,
     dK1_beta  <- as.vector(expit(XBeta) * (1 / (1 + exp(XBeta))) * expit(ZTheta))
     dK1_theta <- as.vector((exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)) * (expit(XBeta) -  expit(YAlpha)))
 
-    dK1_betabeta   <- as.vector((1 - exp(XBeta)) * exp(XBeta) * ((1 / (1 + exp(XBeta)))^3) * expit(ZTheta))
+    dK1_betabeta   <- as.vector((1 - exp(XBeta)) * exp(XBeta) * ((1 / (1 + exp(XBeta))) ^ 3) * expit(ZTheta))
     dK1_betatheta  <- as.vector((exp(XBeta) / ((1 + exp(XBeta)) ^ 2)) * (exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)))
-    dK1_thetatheta <- as.vector((1 - exp(ZTheta)) * exp(ZTheta)*((1/(1+exp(ZTheta)))^3) * (expit(XBeta) - expit(YAlpha)))
+    dK1_thetatheta <- as.vector((1 - exp(ZTheta)) * exp(ZTheta) * ((1 / (1 + exp(ZTheta))) ^ 3) * (expit(XBeta) - expit(YAlpha)))
 
     if (expectedInfo) {
         tmp <- as.vector(1 / (K1 * (1 - K1)))
@@ -84,24 +84,27 @@ obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE,
         meat_thetatheta <- -as.vector(dK1_theta * dK1_theta) * tmp
 
     } else {
-        meat_betabeta   <-  Dstar * (( K1 * dK1_betabeta - dK1_beta * dK1_beta) / (K1^2))
-        meat_betatheta  <-  Dstar * (( K1 * dK1_betatheta - dK1_beta * dK1_theta) / (K1^2))
-        meat_thetatheta <-  Dstar * (( K1 * dK1_thetatheta - dK1_theta * dK1_theta) / (K1^2))
-        meat_betabeta   <- meat_betabeta   - (1 - Dstar) * (((1 - K1) * dK1_betabeta + dK1_beta * dK1_beta) / ((1 - K1)^2))
-        meat_betatheta  <- meat_betatheta  - (1 - Dstar) * (((1 - K1) * dK1_betatheta + dK1_beta * dK1_theta) / ((1 - K1)^2))
-        meat_thetatheta <- meat_thetatheta - (1 - Dstar) * (((1 - K1) * dK1_thetatheta + dK1_theta * dK1_theta) / ((1 - K1)^2))
+        tmp <- Dstar / K1 ^ 2
+        meat_betabeta   <- tmp * (K1 * dK1_betabeta - dK1_beta * dK1_beta)
+        meat_betatheta  <- tmp * (K1 * dK1_betatheta - dK1_beta * dK1_theta)
+        meat_thetatheta <- tmp * (K1 * dK1_thetatheta - dK1_theta * dK1_theta)
+
+        tmp <- (1 - Dstar) / (1 - K1) ^ 2
+        meat_betabeta   <- meat_betabeta   - tmp * ((1 - K1) * dK1_betabeta + dK1_beta * dK1_beta)
+        meat_betatheta  <- meat_betatheta  - tmp * ((1 - K1) * dK1_betatheta + dK1_beta * dK1_theta)
+        meat_thetatheta <- meat_thetatheta - tmp * ((1 - K1) * dK1_thetatheta + dK1_theta * dK1_theta)
     }
 
-  I_betabeta   <- t(sweep(X1, MARGIN = 1, meat_betabeta, `*`) ) %*% X1
-  I_betatheta  <- t(sweep(X1, MARGIN = 1, meat_betatheta, `*`))  %*% Z1
-  I_thetatheta <- t(sweep(Z1, MARGIN = 1, meat_thetatheta, `*`)) %*% Z1
-  Info = rbind(cbind(I_thetatheta, t(I_betatheta)),
-               cbind(I_betatheta, I_betabeta))
+    I_betabeta   <- t(apply(X1, 2, function(x1) x1 * meat_betabeta)) %*% X1
+    I_betatheta  <- t(apply(X1, 2, function(x1) x1 * meat_betatheta)) %*% Z1
+    I_thetatheta <- t(apply(Z1, 2, function(x1) x1 * meat_thetatheta)) %*% Z1
 
-  if(!getInfo){
-    variance = solve(-Info)
-    return(variance)
-  } else{
-    return(-Info)
-  }
+    info <- rbind(cbind(I_thetatheta, t(I_betatheta)),
+                  cbind(I_betatheta, I_betabeta))
+
+    if (!getInfo) {
+        solve(-info)
+    } else {
+        -info
+    }
 }

@@ -4,13 +4,13 @@
 \alias{approxdist}
 \title{approxdist}
 \usage{
-approxdist(Z, Dstar, c_marg, weights = NULL)
+approxdist(Dstar, Z, c_marg, weights = NULL)
 }
 \arguments{
-\item{Z}{Matrix  with covariates in disease model}
-
 \item{Dstar}{Numeric vector containing observed disease status. Should be
 coded as 0/1}
+
+\item{Z}{Numeric matrix of covariates in disease model}
 
 \item{c_marg}{Marginal sensitivity, P(D^* | D)}
 

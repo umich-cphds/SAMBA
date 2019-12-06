@@ -29,8 +29,9 @@
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
 #' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
 #' }
+#' @param Dstar Numeric vector containing observed disease status. Should be
+#'     coded as 0/1
 #' @param Z matrix or data frame with covariates in disease model
-#' @param Dstar matrix or data frame containing observed disease status
 #' @param weights (optional) vector of subject-specific weights used for
 #'     selection bias adjustment.
 #' @param c_X sensitivity as a function of X, P(observe disease | have disease, X)
@@ -38,8 +39,14 @@
 #'   (intercept, logOR of Z)
 #' @return variance vector of variance estimates for disease model
 #' @export
-nonlogistic <- function(Z, Dstar, c_X, weights = NULL)
+nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
 {
+    if (!is.numeric(Dstar) || !is.vector(Dstar))
+        stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+        stop("'Dstar' must be coded 0/1.")
+
+    n <- length(Dstar)
     if (is.data.frame(Z))
         Z <- as.matrix(Z)
     if (!is.numeric(Z))
@@ -49,12 +56,7 @@ nonlogistic <- function(Z, Dstar, c_X, weights = NULL)
     if (!is.matrix(Z))
         stop("'Z' must be a numeric matrix.")
 
-    if (!is.numeric(Dstar) || !is.vector(Dstar))
-        stop("'Dstar' must be a numeric vector.")
-    if (length(setdiff(0:1, unique(Dstar))) != 0)
-        stop("'Dstar' must be coded 0/1.")
-
-    if (nrow(Z) != length(Dstar))
+    if (nrow(Z) != n)
         stop("The number of rows of 'Z' must match the length of 'Dstar'.")
 
     if (!is.numeric(c_X) || !is.vector(c_X))
@@ -62,14 +64,7 @@ nonlogistic <- function(Z, Dstar, c_X, weights = NULL)
     if (length(c_X) != length(Dstar))
         stop("'c_X' must have the same length as 'Dstar'.")
 
-    if (!is.null(weights)) {
-        if (length(weights) != length(Dstar))
-            stop("The length of 'weights' must match the length of 'Dstar'.")
-        if (!is.numeric(weights) || !is.vector(weights))
-            stop("'weights' must be a numeric vector.")
-        if (any(weights < 0))
-            stop("'weights' must be nonnegative.")
-    }
+    check.weights(weights, n)
 
     fitTheta <- stats::glm(Dstar ~ Z, family = stats::binomial())
     starting <- stats::coef(fitTheta)

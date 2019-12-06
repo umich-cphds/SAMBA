@@ -4,14 +4,15 @@
 \alias{sensitivity}
 \title{sensitivity}
 \usage{
-sensitivity(X, Dstar, prev, r = NULL, weights = NULL)
+sensitivity(Dstar, X, prev, r = NULL, weights = NULL)
 }
 \arguments{
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
+
 \item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
 to fit model with no covariates in sensitivity model. 'X' should not
 contain an intercept.}
-
-\item{Dstar}{Vector containing observed disease status}
 
 \item{prev}{Disease prevalence in the population or subject-specific
 \eqn{P(D|X)} in population}

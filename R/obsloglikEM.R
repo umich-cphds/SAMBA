@@ -46,8 +46,39 @@
 obsloglikEM <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
                         weights = NULL, tol = 1e-6, maxit = 50)
 {
-    X <- as.matrix(X)
-    Z <- as.matrix(Z)
+    if (is.data.frame(Z))
+        Z <- as.matrix(Z)
+    if (!is.numeric(Z))
+        stop("'Z' should be a numeric matrix.")
+
+    if (is.vector(Z))
+        Z <- as.matrix(Z)
+    if (!is.matrix(Z))
+        stop("'Z' should be a matrix or data.frame.")
+
+    if (!is.null(X)) {
+        if (!is.numeric(X))
+            stop("'X' must be numeric.")
+        if (is.vector(X))
+            X <- as.matrix(X)
+        if (!is.matrix(X))
+            stop("'X' must be a data.frame or matrix.")
+    }
+
+    if (!is.numeric(Dstar) || !is.vector(Dstar))
+        stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+        stop("'Dstar' must be coded 0/1.")
+
+    n <- length(Dstar)
+    if (nrow(Z) != n)
+        stop("The number of rows of 'Z' must match the length of 'Dstar'.")
+    if (!is.null(X) && nrow(X) != n)
+        stop("The number of rows of 'X' must match the length of 'Dstar'.")
+
+    check.weights(weights, n)
+    if (is.null(weights))
+        weights <- rep(1, n)
 
     # initialise p for EM
     theta <- param_current[1:(1 + ncol(Z))]

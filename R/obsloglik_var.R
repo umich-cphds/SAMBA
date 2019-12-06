@@ -36,8 +36,10 @@
 #' When the intercept is fixed, (1) return the information matrix, (2) remove the
 #' row/column corresponding to the fixed parameter, and (3) invert the information
 #' matrix to get the fixed-parameter covariance matrix
-#' @param theta estimated value of theta from a call to misclass_max or misclass_maxEM
-#' @param beta estimated value of beta from a call to misclass_max or misclass_maxEM
+#' @param theta estimated value of theta from a call to misclass_max or
+#'     misclass_maxEM
+#' @param beta estimated value of beta from a call to misclass_max or
+#'     misclass_maxEM
 #' @param Z matrix or data frame with covariates in disease model
 #' @param X matrix or data frame with covariates in sensitivity model. Set to
 #'     NULL to fit model with no covariates in sensitivity model.
@@ -51,30 +53,30 @@
 #' @return Info estimated information matrix.
 #' @return variance estimated covariance matrix.
 #' @export
-obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE, expectedInfo = TRUE)
+obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE,
+                          expectedInfo = TRUE)
 {
     n <- nrow(Z)
-    XBeta <- cbind(rep(1, n), X) %*% beta
+
+    X1 <- cbind(1, X)
+    Z1 <- cbind(1, Z)
+    XBeta <- X1 %*% beta
 
     #fixed logit(1-specificity). Currently, we only support specificity = 1
     alpha_fixed <- -Inf
     YAlpha      <- cbind(as.matrix(rep(alpha_fixed, n)))
-    ZTheta      <- cbind(rep(1, n), Z) %*% theta
+    ZTheta      <- Z1 %*% theta
 
     ### Calculate Derivatives ###
     K1 <- expit(XBeta) * expit(ZTheta) + expit(YAlpha) * (1 - expit(ZTheta))
 
-    dK1_beta  <- as.vector(expit(XBeta) * (1 / (1 + exp(XBeta))) * expit(ZTheta))#check
-    dK1_theta <- as.vector((exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)) * (expit(XBeta) -  expit(YAlpha))) #check
+    dK1_beta  <- as.vector(expit(XBeta) * (1 / (1 + exp(XBeta))) * expit(ZTheta))
+    dK1_theta <- as.vector((exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)) * (expit(XBeta) -  expit(YAlpha)))
 
-    dK1_betabeta   <- as.vector((1-exp(XBeta))*exp(XBeta)*((1/(1+exp(XBeta)))^3)  *expit(ZTheta))
-    dK1_betatheta  <- as.vector((exp(XBeta)/((1+exp(XBeta))^2))   *     (exp(ZTheta)/((1+exp(ZTheta))^2)))
-    dK1_thetatheta <- as.vector((1-exp(ZTheta))*exp(ZTheta)*((1/(1+exp(ZTheta)))^3)  *  (expit(XBeta) - expit(YAlpha)))
+    dK1_betabeta   <- as.vector((1 - exp(XBeta)) * exp(XBeta) * ((1 / (1 + exp(XBeta)))^3) * expit(ZTheta))
+    dK1_betatheta  <- as.vector((exp(XBeta) / ((1 + exp(XBeta)) ^ 2)) * (exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)))
+    dK1_thetatheta <- as.vector((1 - exp(ZTheta)) * exp(ZTheta)*((1/(1+exp(ZTheta)))^3) * (expit(XBeta) - expit(YAlpha)))
 
-
-  #############################################
-  ### Calculate Expected Information Matrix ###
-  #############################################
     if (expectedInfo) {
         tmp <- as.vector(1 / (K1 * (1 - K1)))
         meat_betabeta   <- -as.vector(dK1_beta * dK1_beta)   * tmp
@@ -90,9 +92,9 @@ obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE, expectedInf
         meat_thetatheta <- meat_thetatheta - (1 - Dstar) * (((1 - K1) * dK1_thetatheta + dK1_theta * dK1_theta) / ((1 - K1)^2))
     }
 
-  I_betabeta = t( sweep(as.matrix(cbind(rep(1,n),X)), MARGIN=1, meat_betabeta, `*`) ) %*% as.matrix(cbind(rep(1,n),X))
-  I_betatheta = t(sweep(as.matrix(cbind(rep(1,n),X)), MARGIN=1, meat_betatheta, `*`))  %*% as.matrix(cbind(rep(1,n),Z))
-  I_thetatheta = t( sweep(as.matrix(cbind(rep(1,n),Z)), MARGIN=1, meat_thetatheta, `*`)) %*% as.matrix(cbind(rep(1,n),Z))
+  I_betabeta   <- t(sweep(X1, MARGIN = 1, meat_betabeta, `*`) ) %*% X1
+  I_betatheta  <- t(sweep(X1, MARGIN = 1, meat_betatheta, `*`))  %*% Z1
+  I_thetatheta <- t(sweep(Z1, MARGIN = 1, meat_thetatheta, `*`)) %*% Z1
   Info = rbind(cbind(I_thetatheta, t(I_betatheta)),
                cbind(I_betatheta, I_betabeta))
 

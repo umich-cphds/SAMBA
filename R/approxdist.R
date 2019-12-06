@@ -29,9 +29,9 @@
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
 #' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
 #' }
-#' @param Z Matrix  with covariates in disease model
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
+#' @param Z Numeric matrix of covariates in disease model
 #' @param weights Optional vector of subject-specific weights used for
 #'     selection bias adjustment. Default is NULL
 #' @param c_marg Marginal sensitivity, P(D^* | D)
@@ -39,38 +39,32 @@
 #'     for disease model(intercept, logOR of Z), and 'variance', a vector of
 #'     variance estimates for disease model
 #' @export
-approxdist <- function(Z, Dstar, c_marg, weights = NULL)
+approxdist <- function(Dstar, Z, c_marg, weights = NULL)
 {
-    if (is.data.frame(Z))
-        Z <- as.matrix(Z)
-    if (!is.numeric(Z))
-        stop("'Z' should be a numeric matrix.")
-
-    if (is.vector(Z))
-        Z <- as.matrix(Z)
-    if (!is.matrix(Z))
-        stop("'Z' should be a matrix or data.frame.")
-
     if (!is.numeric(Dstar) || !is.vector(Dstar))
         stop("'Dstar' must be a numeric vector.")
     if (length(setdiff(0:1, unique(Dstar))) != 0)
         stop("'Dstar' must be coded 0/1.")
 
+    n <- length(Dstar)
+    if (is.data.frame(Z))
+        Z <- as.matrix(Z)
+    if (!is.numeric(Z))
+        stop("'Z' should be a numeric matrix.")
+    if (is.vector(Z))
+        Z <- as.matrix(Z)
+    if (!is.matrix(Z))
+        stop("'Z' should be a matrix or data.frame.")
+    if (n != nrow(Z))
+        stop("The number of rows of 'Z' must match the length of 'Dstar'.")
+
     if (c_marg > 1)
         stop(paste("'c_marg' greater than 1. Try estimating sensitivity",
                    "as a function of covariates."))
 
-    n <- length(Dstar)
-    if (is.null(weights)) {
+    check.weights(weights, n)
+    if (is.null(weights))
         weights <- rep(1 / n, n)
-    } else {
-        if (length(weights) != length(Dstar))
-            stop("The length of 'weights' must match the length of 'Dstar'.")
-        if (!is.numeric(weights) || !is.vector(weights))
-            stop("'weights' must be a numeric vector.")
-        if (any(weights < 0))
-            stop("'weights' must be nonnegative.")
-    }
 
     if (length(unique(weights)) == 1) {
         fit <- stats::glm(Dstar ~ Z, family = stats::binomial())

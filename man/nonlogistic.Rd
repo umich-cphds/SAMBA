@@ -5,12 +5,13 @@
 \title{Estimate parameters in the disease model given a previously-estimated
 sensitivity.}
 \usage{
-nonlogistic(Z, Dstar, c_X, weights = NULL)
+nonlogistic(Dstar, Z, c_X, weights = NULL)
 }
 \arguments{
-\item{Z}{matrix or data frame with covariates in disease model}
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
 
-\item{Dstar}{matrix or data frame containing observed disease status}
+\item{Z}{matrix or data frame with covariates in disease model}
 
 \item{c_X}{sensitivity as a function of X, P(observe disease | have disease, X)}
 

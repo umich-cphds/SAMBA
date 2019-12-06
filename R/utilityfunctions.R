@@ -30,3 +30,15 @@ modLink <- function(cX)
                    valideta = valideta, name = link),
               class = "link-glm")
 }
+
+check.weights <- function(weights, n)
+{
+    if (!is.null(weights)) {
+        if (length(weights) != n)
+            stop("The length of 'weights' must match the length of 'Dstar'.")
+        if (!is.numeric(weights) || !is.vector(weights))
+            stop("'weights' must be a numeric vector.")
+        if (any(weights < 0))
+            stop("'weights' must be nonnegative.")
+    }
+}

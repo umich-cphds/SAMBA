@@ -28,10 +28,11 @@
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
 #' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
 #' }
+#' @param Dstar Numeric vector containing observed disease status. Should be
+#'     coded as 0/1
 #' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
 #'     to fit model with no covariates in sensitivity model. 'X' should not
 #'     contain an intercept.
-#' @param Dstar Vector containing observed disease status
 #' @param prev Disease prevalence in the population or subject-specific
 #'     \eqn{P(D|X)} in population
 #' @param r Optional marginal sampling ratio, \eqn{P(S| D) / P(S| !D)}. Only
@@ -42,8 +43,14 @@
 #' @return A list with two elements: `c_marg`, marginal sensitivity estimate
 #' \eqn{P(D^*| D)} and `c_X`, sensitivity as a function of X, \eqn{P(D^*| D, X)}
 #' @export
-sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
+sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 {
+    if (!is.numeric(Dstar))
+        stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+        stop("'Dstar' must be coded 0/1.")
+
+    n <- length(Dstar)
     if (!is.null(X)) {
         if (!is.numeric(X))
             stop("'X' must be numeric.")
@@ -51,16 +58,9 @@ sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
             X <- as.matrix(X)
         if (!is.matrix(X))
             stop("'X' must be a data.frame or matrix.")
+        if (n != nrow(X))
+            stop("The number of rows of 'X' must match the length of 'Dstar'.")
     }
-
-    if (!is.numeric(Dstar))
-        stop("'Dstar' must be a numeric vector.")
-    if (length(setdiff(0:1, unique(Dstar))) != 0)
-        stop("'Dstar' must be coded 0/1.")
-
-    n <- length(Dstar)
-    if (n != nrow(X))
-        stop("The number of rows of 'X' must match the length of 'Dstar'.")
 
     if (!is.numeric(prev) || !is.vector(prev))
         stop("'prev' must be a numeric vector.")
@@ -74,16 +74,9 @@ sensitivity <- function(X, Dstar, prev, r = NULL, weights = NULL)
     if (!is.null(r) && !is.null(weights))
         stop("Only one of 'r' and weights can be non NULL.")
 
-    if (is.null(weights)) {
+    check.weights(weights, n)
+    if (is.null(weights))
         weights <- rep(1 / n, n)
-    } else {
-        if (length(weights) != length(Dstar))
-            stop("The length of 'weights' must match the length of 'Dstar'.")
-        if (!is.numeric(weights) || !is.vector(weights))
-            stop("'weights' must be a numeric vector.")
-        if (any(weights < 0))
-            stop("'weights' must be nonnegative.")
-    }
 
     if (is.null(r)) {
         r <- 1

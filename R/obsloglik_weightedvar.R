@@ -55,7 +55,7 @@ obsloglik_weightedvar = function(theta, beta, X,Z,Dstar, getInfo = FALSE, expect
   ### Calculate Expected Information Matrix ###
   #############################################
   if(expectedInfo){
-    meat_betabeta =-as.vector(dK1_beta* dK1_beta)*as.vector(1/(K1*(1-K1)))
+    meat_betabeta = -as.vector(dK1_beta * dK1_beta) * as.vector(1 / (K1 * (1 - K1)))
     meat_betatheta =-as.vector(dK1_beta* dK1_theta)*as.vector(1/(K1*(1-K1)))
     meat_thetatheta =-as.vector(dK1_theta* dK1_theta)*as.vector(1/(K1*(1-K1)))
     #exp(XBeta+ZTheta)/((1+exp(ZTheta))*(1+exp(XBeta))*(1+exp(XBeta)+exp(ZTheta)))
@@ -93,7 +93,3 @@ obsloglik_weightedvar = function(theta, beta, X,Z,Dstar, getInfo = FALSE, expect
     return(list(inv_bread = as.matrix(-Info),meat =prodsum  ))
   }
 }
-
-
-
-

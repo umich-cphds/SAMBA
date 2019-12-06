@@ -8,9 +8,11 @@ obsloglik_var(theta, beta, X, Z, Dstar, getInfo = FALSE,
   expectedInfo = TRUE)
 }
 \arguments{
-\item{theta}{estimated value of theta from a call to misclass_max or misclass_maxEM}
+\item{theta}{estimated value of theta from a call to misclass_max or
+misclass_maxEM}
 
-\item{beta}{estimated value of beta from a call to misclass_max or misclass_maxEM}
+\item{beta}{estimated value of beta from a call to misclass_max or
+misclass_maxEM}
 
 \item{X}{matrix or data frame with covariates in sensitivity model. Set to
 NULL to fit model with no covariates in sensitivity model.}

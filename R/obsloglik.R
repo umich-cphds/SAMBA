@@ -46,15 +46,45 @@
 #' @return loglik_save vector of log-likelihood values corresponding to
 #'    different values of beta0_fixed.
 #' @export
-obsloglik <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
-                      weights = NULL, itnmax = 5000)
+obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
+                      beta0_fixed = NULL, itnmax = 5000)
 {
+    if (!is.numeric(Dstar) || !is.vector(Dstar))
+    stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+    stop("'Dstar' must be coded 0/1.")
 
-    Z <- as.matrix(Z)
-    X <- as.matrix(X)
+    n <- length(Dstar)
+    if (!is.null(X)) {
+        if (is.data.frame(X))
+            X <- as.matrix(X)
+        if (!is.numeric(X))
+            stop("'X' must be numeric.")
+        if (is.vector(X))
+            X <- as.matrix(X)
+        if (!is.matrix(X))
+            stop("'X' must be a data.frame or matrix.")
+        if (n != nrow(X))
+            stop("The number of rows of 'X' must match the length of 'Dstar'.")
+    }
+
+    if (is.data.frame(Z))
+        Z <- as.matrix(Z)
+    if (!is.numeric(Z))
+        stop("'Z' must be a numeric matrix.")
+    if (is.vector(Z))
+        Z <- as.matrix(Z)
+    if (!is.matrix(Z))
+        stop("'Z' must be a numeric matrix.")
+    if (n != nrow(Z))
+        stop("The number of rows of 'Z' must match the length of 'Dstar'.")
+
+    check.weights(weights, n)
+    if (is.null(weights))
+        weights <- rep(1, n)
 
     if (!is.numeric(itnmax) || length(itnmax) > 1)
-        stop("'itnmax' must be a single number")
+        stop("'itnmax' must be a single number.")
 
     # Define values to profile over
     if (is.null(beta0_fixed)) {
@@ -106,7 +136,5 @@ max_obsloglik <- function(param, args)
 
     Dstar   <- args$Dstar
     weights <- args$weights
-    if (is.null(weights))
-        weights <- 1
-	 sum(weights * Dstar * log(M) + weights * (1 - Dstar) * log(1 - M))
+    sum(weights * Dstar * log(M) + weights * (1 - Dstar) * log(1 - M))
 }

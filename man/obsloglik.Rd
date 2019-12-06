@@ -4,27 +4,27 @@
 \alias{obsloglik}
 \title{Calculate Observed Profile Log likelihood}
 \usage{
-obsloglik(Z, X, Dstar, param_current, beta0_fixed = NULL,
-  weights = NULL, itnmax = 5000)
+obsloglik(Dstar, Z, X, param_current, weights = NULL,
+  beta0_fixed = NULL, itnmax = 5000)
 }
 \arguments{
+\item{Dstar}{matrix or data frame containing observed disease status}
+
 \item{Z}{Numeric matrix with covariates in disease model}
 
 \item{X}{Numeric Matrix with covariates in sensitivity model. Set to
 NULL to fit model with no covariates in sensitivity model}
 
-\item{Dstar}{matrix or data frame containing observed disease status}
-
 \item{param_current}{vector of starting values for theta and beta (theta, beta).
 Theta is the parameter of the disease model, and beta is the parameter
 of the sensitivity model}
 
+\item{weights}{(optional) vector of subject-specific weights used for
+selection bias adjustment}
+
 \item{beta0_fixed}{(optional) vector of values of sensitivity model intercept
 to profile over. If a single value, corresponds to fixing intercept at
 specified value}
-
-\item{weights}{(optional) vector of subject-specific weights used for
-selection bias adjustment}
 
 \item{itnmax}{Maximum number of iterations to run \code{optimx}}
 }

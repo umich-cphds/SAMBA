@@ -1,7 +1,10 @@
 Package: SAMBA
 Title: Sampling and misclassification bias adjustment for logistic regression model
-Version: 0.0.2.9000
-Authors@R: person("Lauren", "Beesley", email = "lbeesley@umich.edu", role = c("aut", "cre"))
+Version: 0.0.3.9000
+Authors@R: c(
+    person("Alexander", "Rix", email = "alexrix@umich.edu", role = "cre"),
+    person("Lauren", "Beesley", email = "lbeesley@umich.edu", role = "aut")
+    )
 Description: What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8

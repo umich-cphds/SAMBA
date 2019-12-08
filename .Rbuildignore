@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\*.Rcheck
+^SAMBA_*
+cran-comments.md
+^CRAN-RELEASE$
+^README\.Rmd$
+\.travis\.yml

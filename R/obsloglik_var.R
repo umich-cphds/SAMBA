@@ -4,8 +4,6 @@
 #' information matrix for joint estimation of parameters in the disease and
 #' sensitivity models.
 #'
-#'
-#'
 #' We are interested in modeling the relationship between binary disease status
 #' and covariates Z using a logistic regression model. However, D may be
 #' misclassified, and our observed data may not well-represent the population of
@@ -61,46 +59,53 @@ obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE,
     X1 <- cbind(1, X)
     Z1 <- cbind(1, Z)
     XBeta <- X1 %*% beta
+    ZTheta <- Z1 %*% theta
 
     #fixed logit(1-specificity). Currently, we only support specificity = 1
-    alpha_fixed <- -Inf
-    YAlpha      <- cbind(as.matrix(rep(alpha_fixed, n)))
-    ZTheta      <- Z1 %*% theta
+    YAlpha <- matrix(-Inf, n)
+
+    expit.zt <- expit(ZTheta)
+    expit.xb <- expit(XBeta)
+    expit.ya <- expit(YAlpha)
 
     ### Calculate Derivatives ###
-    K1 <- expit(XBeta) * expit(ZTheta) + expit(YAlpha) * (1 - expit(ZTheta))
+    K1 <- as.vector(expit.xb * expit.zt + expit.ya * (1 - expit.zt))
 
-    dK1_beta  <- as.vector(expit(XBeta) * (1 / (1 + exp(XBeta))) * expit(ZTheta))
-    dK1_theta <- as.vector((exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)) * (expit(XBeta) -  expit(YAlpha)))
+    exp.xb <- exp(XBeta)
+    exp.zt <- exp(ZTheta)
 
-    dK1_betabeta   <- as.vector((1 - exp(XBeta)) * exp(XBeta) * ((1 / (1 + exp(XBeta))) ^ 3) * expit(ZTheta))
-    dK1_betatheta  <- as.vector((exp(XBeta) / ((1 + exp(XBeta)) ^ 2)) * (exp(ZTheta) / ((1 + exp(ZTheta)) ^ 2)))
-    dK1_thetatheta <- as.vector((1 - exp(ZTheta)) * exp(ZTheta) * ((1 / (1 + exp(ZTheta))) ^ 3) * (expit(XBeta) - expit(YAlpha)))
+    dK1.dB  <- expit.xb / (1 + exp.xb) * expit.zt
+    dK1.dT <- (exp.zt / ((1 + exp.zt) ^ 2)) * (expit.xb -  expit.ya)
+
+    dK1.dBdB <- (1 - exp.xb) * exp.xb * ((1 / (1 + exp.xb)) ^ 3) * expit.zt
+    dK1.dBdT <- (exp.xb / ((1 + exp.xb) ^ 2)) * (exp.zt / ((1 + exp.zt) ^ 2))
+    dK1.dTdT <- (1 - exp.zt) * exp.zt * ((1 / (1 + exp.zt)) ^ 3)
+    dK1.dTdT <- dK1.dTdT * (expit.xb - expit.ya)
 
     if (expectedInfo) {
         tmp <- as.vector(1 / (K1 * (1 - K1)))
-        meat_betabeta   <- -as.vector(dK1_beta * dK1_beta)   * tmp
-        meat_betatheta  <- -as.vector(dK1_beta * dK1_theta)  * tmp
-        meat_thetatheta <- -as.vector(dK1_theta * dK1_theta) * tmp
+        meat.bb <- -dK1.dB * dK1.dB * tmp
+        meat.bt <- -dK1.dB * dK1.dT * tmp
+        meat.tt <- -dK1.dT * dK1.dT * tmp
 
     } else {
         tmp <- Dstar / K1 ^ 2
-        meat_betabeta   <- tmp * (K1 * dK1_betabeta - dK1_beta * dK1_beta)
-        meat_betatheta  <- tmp * (K1 * dK1_betatheta - dK1_beta * dK1_theta)
-        meat_thetatheta <- tmp * (K1 * dK1_thetatheta - dK1_theta * dK1_theta)
+        meat.bb <- tmp * (K1 * dK1.dBdB - dK1.dB * dK1.dB)
+        meat.bt <- tmp * (K1 * dK1.dBdT - dK1.dB * dK1.dT)
+        meat.tt <- tmp * (K1 * dK1.dTdT - dK1.dT * dK1.dT)
 
         tmp <- (1 - Dstar) / (1 - K1) ^ 2
-        meat_betabeta   <- meat_betabeta   - tmp * ((1 - K1) * dK1_betabeta + dK1_beta * dK1_beta)
-        meat_betatheta  <- meat_betatheta  - tmp * ((1 - K1) * dK1_betatheta + dK1_beta * dK1_theta)
-        meat_thetatheta <- meat_thetatheta - tmp * ((1 - K1) * dK1_thetatheta + dK1_theta * dK1_theta)
+        meat.bb <- meat.bb - tmp * ((1 - K1) * dK1.dBdB + dK1.dB * dK1.dB)
+        meat.bt <- meat.bt - tmp * ((1 - K1) * dK1.dBdT + dK1.dB * dK1.dT)
+        meat.tt <- meat.tt - tmp * ((1 - K1) * dK1.dTdT + dK1.dT * dK1.dT)
     }
 
-    I_betabeta   <- t(apply(X1, 2, function(x1) x1 * meat_betabeta)) %*% X1
-    I_betatheta  <- t(apply(X1, 2, function(x1) x1 * meat_betatheta)) %*% Z1
-    I_thetatheta <- t(apply(Z1, 2, function(x1) x1 * meat_thetatheta)) %*% Z1
+    I.betabeta   <- t(apply(X1, 2, function(x1) x1 * as.vector(meat.bb))) %*% X1
+    I.betatheta  <- t(apply(X1, 2, function(x1) x1 * as.vector(meat.bt))) %*% Z1
+    I.thetatheta <- t(apply(Z1, 2, function(x1) x1 * as.vector(meat.tt))) %*% Z1
 
-    info <- rbind(cbind(I_thetatheta, t(I_betatheta)),
-                  cbind(I_betatheta, I_betabeta))
+    info <- rbind(cbind(I.thetatheta, t(I.betatheta)),
+                  cbind(I.betatheta, I.betabeta))
 
     if (!getInfo) {
         solve(-info)

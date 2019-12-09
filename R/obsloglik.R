@@ -112,10 +112,10 @@ obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
 
         param_current[2 + ncol(Z)] <- val
         opt <- optimx::optimx(param_current, max_obsloglik, control =
-                              list(maximize = TRUE, save.failures = F), itnmax =
-                              itnmax, method = c("BFGS", "Nelder-Mead"),
-                              args = list(Z = Z, X = X, Dstar = Dstar,
-                                          opt = opt_long, weights = weights))
+                              list(maximize = TRUE, save.failures = F, trace = 0),
+                              itnmax = itnmax, method = c("BFGS", "Nelder-Mead"),
+                              args = list(Z = Z, X = X, Dstar = Dstar, opt =
+                                          opt_long, weights = weights))
 
         i <- which.max(opt$value)
         param_save  <- rbind(param_save, stats::coef(opt)[i, ])

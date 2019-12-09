@@ -1,11 +1,20 @@
 Package: SAMBA
-Title: Sampling and misclassification bias adjustment for logistic regression model
+Title: Sampling and misclassification bias adjustment for logistic regression models
 Version: 0.0.3.9000
 Authors@R: c(
     person("Alexander", "Rix", email = "alexrix@umich.edu", role = "cre"),
     person("Lauren", "Beesley", email = "lbeesley@umich.edu", role = "aut")
     )
-Description: What the package does (one paragraph).
+Description:
+    Health research using data from electronic health records (EHR) has gained
+    popularity, but misclassification of EHR-derived disease status and lack of
+    representativeness of the study sample can result in substantial bias in
+    effect estimates and can impact power and type I error for association
+    tests. Here, the assumed target of inference is the relationship between
+    binary disease status and predictors modeled using a logistic regression
+    model. SAMBA implements several methods for obtaining bias-corrected
+    point estimates along with valid standard errors as proposed in Beesley and
+    Mukherjee (2020), currently under review.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

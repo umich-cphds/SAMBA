@@ -34,30 +34,76 @@
 #' When the intercept is fixed, (1) return the information matrix, (2) remove the
 #' row/column corresponding to the fixed parameter, and (3) invert the information
 #' matrix to get the fixed-parameter covariance matrix
+#' @param Dstar Numeric vector containing observed disease status. Should be
+#'     coded as 0/1
+#' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
+#'     to fit model with no covariates in sensitivity model. 'X' should not
+#'     contain an intercept
+#' @param Z Numeric matrix of covariates in disease model
 #' @param theta estimated value of theta from a call to misclass_max or
 #'     misclass_maxEM
 #' @param beta estimated value of beta from a call to misclass_max or
 #'     misclass_maxEM
-#' @param Z matrix or data frame with covariates in disease model
-#' @param X matrix or data frame with covariates in sensitivity model. Set to
-#'     NULL to fit model with no covariates in sensitivity model.
-#' @param Dstar matrix or data frame containing observed disease status
-#' @param getInfo indicator for whether the information matrix or covariance
-#'     matrix should be returned. Default is FALSE.
-#' @param expectedInfo indicator for whether the observed or expected
+#' @param getInfo Logical variable for whether the information matrix or
+#'     covariance matrix should be returned. Default is FALSE.
+#' @param expectedInfo Logical variable for whether the observed or expected
 #'     information matrix should be used to estimate variance. Default is the
 #'     expected information matrix (TRUE).
-#'
 #' @return Info estimated information matrix.
 #' @return variance estimated covariance matrix.
 #' @export
-obsloglik_var <- function(theta, beta, X, Z, Dstar, getInfo = FALSE,
+obsloglik_var <- function(Dstar, X, Z, theta, beta, getInfo = FALSE,
                           expectedInfo = TRUE)
 {
-    n <- nrow(Z)
+    if (!is.numeric(Dstar) || !is.vector(Dstar))
+    stop("'Dstar' must be a numeric vector.")
+    if (length(setdiff(0:1, unique(Dstar))) != 0)
+    stop("'Dstar' must be coded 0/1.")
+
+    n <- length(Dstar)
+    if (!is.null(X)) {
+        if (is.data.frame(X))
+            X <- as.matrix(X)
+        if (!is.numeric(X))
+            stop("'X' must be numeric.")
+        if (is.vector(X))
+            X <- as.matrix(X)
+        if (!is.matrix(X))
+            stop("'X' must be a data.frame or matrix.")
+        if (n != nrow(X))
+            stop("The number of rows of 'X' must match the length of 'Dstar'.")
+    }
+
+    if (is.data.frame(Z))
+        Z <- as.matrix(Z)
+    if (!is.numeric(Z))
+        stop("'Z' must be a numeric matrix.")
+    if (is.vector(Z))
+        Z <- as.matrix(Z)
+    if (!is.matrix(Z))
+        stop("'Z' must be a numeric matrix.")
+    if (n != nrow(Z))
+        stop("The number of rows of 'Z' must match the length of 'Dstar'.")
+
+    if (!is.logical(getInfo))
+        stop("'getInfo' must take a logical value.")
+
+    if (!is.logical(expectedInfo))
+        stop("'expectedInfo' must take a logical value.")
 
     X1 <- cbind(1, X)
     Z1 <- cbind(1, Z)
+
+    if (!is.numeric(beta) || !is.vector(beta))
+        stop("'beta' must be a numeric vector.")
+    if (length(beta) != ncol(X1))
+        stop("'beta' must have length 'ncol(X) + 1'.")
+
+    if (!is.numeric(theta) || !is.vector(theta))
+        stop("'theta' must be a numeric vector.")
+    if (length(theta) != ncol(Z1))
+        stop("'theta' must have length 'ncol(Z) + 1'.")
+
     XBeta <- X1 %*% beta
     ZTheta <- Z1 %*% theta
 

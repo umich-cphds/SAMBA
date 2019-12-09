@@ -4,27 +4,29 @@
 \alias{obsloglik_var}
 \title{obsloglik_var}
 \usage{
-obsloglik_var(theta, beta, X, Z, Dstar, getInfo = FALSE,
+obsloglik_var(Dstar, X, Z, theta, beta, getInfo = FALSE,
   expectedInfo = TRUE)
 }
 \arguments{
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
+
+\item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
+to fit model with no covariates in sensitivity model. 'X' should not
+contain an intercept}
+
+\item{Z}{Numeric matrix of covariates in disease model}
+
 \item{theta}{estimated value of theta from a call to misclass_max or
 misclass_maxEM}
 
 \item{beta}{estimated value of beta from a call to misclass_max or
 misclass_maxEM}
 
-\item{X}{matrix or data frame with covariates in sensitivity model. Set to
-NULL to fit model with no covariates in sensitivity model.}
+\item{getInfo}{Logical variable for whether the information matrix or
+covariance matrix should be returned. Default is FALSE.}
 
-\item{Z}{matrix or data frame with covariates in disease model}
-
-\item{Dstar}{matrix or data frame containing observed disease status}
-
-\item{getInfo}{indicator for whether the information matrix or covariance
-matrix should be returned. Default is FALSE.}
-
-\item{expectedInfo}{indicator for whether the observed or expected
+\item{expectedInfo}{Logical variable for whether the observed or expected
 information matrix should be used to estimate variance. Default is the
 expected information matrix (TRUE).}
 }

@@ -12,7 +12,7 @@ coded as 0/1}
 
 \item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
 to fit model with no covariates in sensitivity model. 'X' should not
-contain an intercept.}
+contain an intercept}
 
 \item{prev}{Disease prevalence in the population or subject-specific
 \eqn{P(D|X)} in population}

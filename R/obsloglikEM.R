@@ -23,10 +23,11 @@
 #' Selection Model: P(S=1|W,D)
 #' Sensitivity Model: logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X
 #'
-#' @param Z matrix or data frame with covariates in disease model
-#' @param X matrix or data frame with covariates in sensitivity model. Set to
-#'     NULL to fit model with no covariates in sensitivity model.
 #' @param Dstar matrix or data frame containing observed disease status
+#' @param Z matrix or data frame with covariates in disease model
+#' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
+#'     to fit model with no covariates in sensitivity model. 'X' should not
+#'     contain an intercept.
 #' @param param_current vector of starting values for theta and beta
 #'     (theta, beta). Theta is the parameter of the disease model, and beta is
 #'     the parameter of the sensitivity model.
@@ -43,7 +44,7 @@
 #' @return loglik.seq vector of log-likelihood values across iterations of the
 #'     expectation algorithm
 #' @export
-obsloglikEM <- function(Z, X, Dstar, param_current, beta0_fixed = NULL,
+obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
                         weights = NULL, tol = 1e-6, maxit = 50)
 {
     if (is.data.frame(Z))

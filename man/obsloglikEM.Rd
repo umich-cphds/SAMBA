@@ -6,16 +6,17 @@
 This function can be used to jointly estimate disease model and sensitivity
 model parameters using an expectation-maximization algorithm.}
 \usage{
-obsloglikEM(Z, X, Dstar, param_current, beta0_fixed = NULL,
+obsloglikEM(Dstar, Z, X, param_current, beta0_fixed = NULL,
   weights = NULL, tol = 1e-06, maxit = 50)
 }
 \arguments{
+\item{Dstar}{matrix or data frame containing observed disease status}
+
 \item{Z}{matrix or data frame with covariates in disease model}
 
-\item{X}{matrix or data frame with covariates in sensitivity model. Set to
-NULL to fit model with no covariates in sensitivity model.}
-
-\item{Dstar}{matrix or data frame containing observed disease status}
+\item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
+to fit model with no covariates in sensitivity model. 'X' should not
+contain an intercept.}
 
 \item{param_current}{vector of starting values for theta and beta
 (theta, beta). Theta is the parameter of the disease model, and beta is

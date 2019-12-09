@@ -38,10 +38,10 @@
 #'
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
+#' @param Z Numeric matrix of covariates in disease model
 #' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
 #'     to fit model with no covariates in sensitivity model. 'X' should not
 #'     contain an intercept
-#' @param Z Numeric matrix of covariates in disease model
 #' @param theta estimated value of theta from a call to misclass_max or misclass_maxEM
 #' @param beta estimated value of beta from a call to misclass_max or misclass_maxEM
 #' @param weights Optional vector of subject-specific weights used for
@@ -55,7 +55,7 @@
 #' @return Info estimated information matrix.
 #' @return variance estimated covariance matrix.
 #' @export
-obsloglik_weightedvar <- function(Dstar, X, Z, theta, beta, weights = NULL,
+obsloglik_weightedvar <- function(Dstar, Z, X, theta, beta, weights = NULL,
                                       getInfo = FALSE, expectedInfo = TRUE)
 {
     if (!is.numeric(Dstar) || !is.vector(Dstar))

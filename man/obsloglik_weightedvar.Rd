@@ -4,18 +4,18 @@
 \alias{obsloglik_weightedvar}
 \title{obsloglik_weightedvar}
 \usage{
-obsloglik_weightedvar(Dstar, X, Z, theta, beta, weights = NULL,
+obsloglik_weightedvar(Dstar, Z, X, theta, beta, weights = NULL,
   getInfo = FALSE, expectedInfo = TRUE)
 }
 \arguments{
 \item{Dstar}{Numeric vector containing observed disease status. Should be
 coded as 0/1}
 
+\item{Z}{Numeric matrix of covariates in disease model}
+
 \item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
 to fit model with no covariates in sensitivity model. 'X' should not
 contain an intercept}
-
-\item{Z}{Numeric matrix of covariates in disease model}
 
 \item{theta}{estimated value of theta from a call to misclass_max or misclass_maxEM}
 

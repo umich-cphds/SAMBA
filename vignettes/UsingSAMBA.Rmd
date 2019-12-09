@@ -89,13 +89,13 @@ nobs <- 5000
 
 ### Generate Predictors and Follow-up Information
 set.seed(1234)
-COV <- mvrnorm(n = nobs, mu = rep(0, 3), Sigma = rbind(c(1,   0, 0.4),
+cov <- mvrnorm(n = nobs, mu = rep(0, 3), Sigma = rbind(c(1,   0, 0.4),
                                                        c(0,   1,   0),
                                                        c(0.4, 0,   1)))
 
-DAT <- data.frame(Z = COV[, 1], X = COV[, 2], W = COV[, 3])
+data <- data.frame(Z = cov[, 1], X = cov[, 2], W = cov[, 3])
 
-### Generate random uniforms
+# Generate random uniforms
 set.seed(5678)
 U1 <- runif(nobs)
 set.seed(4321)
@@ -103,41 +103,41 @@ U2 <- runif(nobs)
 set.seed(8765)
 U3 <- runif(nobs)
 
-### Generate Disease Status
-DISEASE <- expit(-2 + 0.5 * DAT$Z)
-DAT$D   <- ifelse(DISEASE > U1, 1, 0)
+# Generate Disease Status
+DISEASE <- expit(-2 + 0.5 * data$Z)
+data$D   <- ifelse(DISEASE > U1, 1, 0)
 
-### Relate W and D
-DAT$W <- DAT$W + 1 * DAT$D
+# Relate W and D
+data$W <- data$W + 1 * data$D
 
-### Generate Misclassification
-SENS <- expit(-0.4 + 1 * DAT$X)
-SENS[DAT$D == 0] = 0
-DAT$Dstar <- ifelse(SENS > U2, 1, 0)
+# Generate Misclassification
+SENS <- expit(-0.4 + 1 * data$X)
+SENS[data$D == 0] = 0
+data$Dstar <- ifelse(SENS > U2, 1, 0)
 
-### Generate Sampling Status
-SELECT <- expit(-0.6 + 1 * DAT$D + 0.5 * DAT$W)
-DAT$S  <- ifelse(SELECT > U3, 1, 0)
+# Generate Sampling Status
+SELECT <- expit(-0.6 + 1 * data$D + 0.5 * data$W)
+S  <- ifelse(SELECT > U3, T, F)
 
-### Observed Data
-DAT_SUB <- DAT[DAT$S == 1,]
+# Observed Data
+data.samp <- data[S,]
 
-### True marginal sampling ratio
-prob1 <- expit(-0.6 + 1 * 1 + 0.5 * DAT$W )
-prob0 <- expit(-0.6 + 1 * 0 + 0.5 * DAT$W )
-r_marg_true <- mean(prob1[DAT$D == 1]) / mean(prob0[DAT$D == 0])
+# True marginal sampling ratio
+prob1 <- expit(-0.6 + 1 * 1 + 0.5 * data$W)
+prob0 <- expit(-0.6 + 1 * 0 + 0.5 * data$W)
+r.marg.true <- mean(prob1[data$D == 1]) / mean(prob0[data$D == 0])
 
-### True inverse probability of sampling weights
-prob_WD <- expit(-0.6 + 1 * DAT_SUB$D + 0.5 * DAT_SUB$W)
-weights <- length(DAT_SUB[, 1]) * (1  /prob_WD) / (sum(1 / prob_WD))
+# True inverse probability of sampling weights
+prob.WD <- expit(-0.6 + 1 * data.samp$D + 0.5 * data.samp$W)
+weights <- nrow(data.samp) * (1  / prob.WD) / (sum(1 / prob.WD))
 
-### True associations with D in population
-trueX <- glm(D ~ X, family = binomial(), data = DAT)
-trueZ <- glm(D ~ Z, family = binomial(), data = DAT)
+# True associations with D in population
+trueX <- glm(D ~ X, binomial(), data = data)
+trueZ <- glm(D ~ Z, binomial(), data = data)
 
-### Initial Parameter Values
-fitBeta  <- glm(Dstar ~ X,  family = binomial(), data = DAT_SUB)
-fitTheta <- glm(Dstar ~ Z, family = binomial(), data = DAT_SUB)
+# Initial Parameter Values
+fitBeta  <- glm(Dstar ~ X, binomial(), data = data.samp)
+fitTheta <- glm(Dstar ~ Z, binomial(), data = data.samp)
 ```
 
 ## Estimating Sensitivity
@@ -146,24 +146,22 @@ In Beesley and Mukherjee (2020) (*UNDER REVIEW*), we develop several strategies
 for estimating sensitivity as a function of covariates X. Here, we apply
 several of the proposed strategies.
 
-```{r, echo = TRUE, eval = TRUE,  fig.width = 7, fig.height= 4,  results='hide'}
-### Using marginal sampling ratio r and P(D=1)
-sens1 <- sensitivity(X = DAT_SUB$X, Dstar = DAT_SUB$Dstar, r = r_marg_true,
-                     prev = mean(DAT$D))
+```{r}
+# Using marginal sampling ratio r and P(D=1)
+sens1 <- sensitivity(data.samp$Dstar, data.samp$X, mean(data$D),
+                      r = r.marg.true)
 
-### Using inverse probability of selection weights and P(D=1)
-sens2 <- sensitivity(X = DAT_SUB$X, Dstar = DAT_SUB$Dstar,  weights = weights,
-                     prev = mean(DAT$D))
+# Using inverse probability of selection weights and P(D=1)
+sens2 <- sensitivity(data.samp$Dstar, data.samp$X, prev = mean(data$D),
+                     weights = weights)
 
-### Using marginal sampling ratio r and P(D=1|X)
-sens3 <- sensitivity(X = DAT_SUB$X, Dstar = DAT_SUB$Dstar,
-                    r = r_marg_true, prev = predict(trueX, newdata = DAT_SUB,
-                                                    type = 'response'))
+# Using marginal sampling ratio r and P(D=1|X)
+prev  <- predict(trueX, newdata = data.samp, type = 'response')
+sens3 <- sensitivity(data.samp$Dstar, data.samp$X, prev, r = r.marg.true)
 
-### Using inverse probability of selection weights and P(D=1|X)
-sens4 <- sensitivity(X = DAT_SUB$X, Dstar = DAT_SUB$Dstar,
-                    weights = weights, prev = predict(trueX, newdata = DAT_SUB,
-                                                      type = 'response'))
+# Using inverse probability of selection weights and P(D=1|X)
+prev  <- predict(trueX, newdata = data.samp, type = 'response')
+sens4 <- sensitivity(data.samp$Dstar, data.samp$X, prev, weights = weights)
 ```
 ## Estimating log-odds ratio for D|Z
 
@@ -171,67 +169,82 @@ We propose several strategies for estimating the association between D and Z
 from a logistic regression model in the presence of different biasing factors.
 Below, we provide code for implementing these methods.
 
-```{r, echo = TRUE, eval = TRUE,  fig.width = 7, fig.height = 4, message = FALSE, results = 'hide'}
-### Approximation of D*|Z
-approx1 <- approxdist(Z = DAT_SUB$Z, Dstar = DAT_SUB$Dstar, weights = weights,
-                      c_marg = sens1$c_marg)
+```{r}
+# Approximation of D*|Z
+approx1 <- approxdist(data.samp$Dstar, data.samp$Z, sens1$c_marg,
+                      weights = weights)
 
-### Non-logistic link function method
-nonlog1 <- nonlogistic(Z = DAT_SUB$Z, Dstar = DAT_SUB$Dstar,
-                       weights = weights, c_X = sens3$c_X)
+# Non-logistic link function method
+nonlog1 <- nonlogistic(data.samp$Dstar, data.samp$Z, c_X = sens3$c_X,
+                       weights = weights)
 
-### Direct observed data likelihood maximization without fixed intercept
-starting <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
-fit <- obsloglik(Z = DAT_SUB$Z, X = DAT_SUB$X, Dstar = DAT_SUB$Dstar,
-                 param_current = starting, weights = weights)
+# Direct observed data likelihood maximization without fixed intercept
+start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
+fit <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
+                 weights = weights)
 
-var <- obsloglik_weightedvar(theta = fit$param[1:2], beta = fit$param[3:4],
-                    X = DAT_SUB$X, Z = DAT_SUB$Z, Dstar = DAT_SUB$Dstar,
-                    getInfo = FALSE, weights = weights)
+var <- obsloglik_weightedvar(data.samp$Dstar, data.samp$Z, data.samp$X, theta =   
+                             fit$param[1:2], beta = fit$param[3:4], weights =
+                             weights, getInfo = FALSE)
 
-variance <- diag(var)
+variance   <- diag(var)
 obsloglik1 <- list(param = fit$param, variance = variance)
 
-### Direct observed data likelihood maximization with fixed intercept
-starting = as.numeric(c(coef(fitTheta), logit(sens1$c_marg),coef(fitBeta)[2]))
-fit = obsloglik(Z=DAT_SUB$Z, X=DAT_SUB$X, Dstar  = DAT_SUB$Dstar,
-                   param_current = starting,
-                   beta0_fixed = logit(sens1$c_marg), weights = weights)
-Info = obsloglik_weightedvar(theta = fit$param[1:2], beta = fit$param[3:4],
-                    X=DAT_SUB$X, Z = DAT_SUB$Z, Dstar = DAT_SUB$Dstar, getInfo = TRUE, weights = weights)
-Bread = solve(Info$inv_bread[c(1,2,4), c(1,2,4)])
-Meat = Info$meat[c(1,2,4), c(1,2,4)]
-variance = diag(Bread %*% Meat %*% Bread) #sandwich estimator excluding fixed intercept
-obsloglik2 = list(param = fit$param, variance = variance)
+# Direct observed data likelihood maximization with fixed intercept
+start <- as.numeric(c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2]))
+fit   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
+                 beta0_fixed = logit(sens1$c_marg), weights = weights)
+
+info <- obsloglik_weightedvar(data.samp$Dstar, data.samp$Z , data.samp$X,
+                              theta = fit$param[1:2], beta = fit$param[3:4],
+                              weights = weights, getInfo = TRUE)
+
+bread <- solve(info$inv_bread[c(1, 2, 4), c(1, 2, 4)])
+meat  <- info$meat[c(1, 2, 4), c(1, 2, 4)]
+
+# sandwich estimator excluding fixed intercept
+var        <- diag(bread %*% meat %*% bread)
+obsloglik2 <- list(param = fit$param, variance = variance)
 ```
-
-
-
-
-
 ## Plotting sensitivity estimates
 
-**Figure 2** shows the estimated individual-level sensitivity values when the marginal sampling ratio (r-tilde) is correctly specified. We can see that there is strong concordance with the true sensitivity values.
+**Figure 2** shows the estimated individual-level sensitivity values when the
+marginal sampling ratio (r-tilde) is correctly specified. We can see that there
+is strong concordance with the true sensitivity values.
 ```{r, echo = FALSE, eval = TRUE,  fig.width = 5, fig.height= 5}
-plot(sort(sens3$c_X), xlab = 'Patients', ylab = 'Sensitivity', main = 'Figure 2: Sensitivity Estimates', type = 'l', col = 'red', lwd = 2)
-lines(sort(expit(obsloglik1$param[3] + obsloglik1$param[4]*DAT_SUB$X)), col = 'blue', lwd = 2)
-lines(sort(expit(obsloglik2$param[3] + obsloglik2$param[4]*DAT_SUB$X)), col = 'green', lwd = 2)
+plot(sort(sens3$c_X), xlab = 'Patients', ylab = 'Sensitivity',
+     main = 'Figure 2: Sensitivity Estimates', type = 'l', col = 'red', lwd = 2)
+lines(sort(expit(obsloglik1$param[3] + obsloglik1$param[4]*data.samp$X)), col = 'blue', lwd = 2)
+lines(sort(expit(obsloglik2$param[3] + obsloglik2$param[4]*data.samp$X)), col = 'green', lwd = 2)
 abline(h=sens1$c_marg, col = 'purple', lwd = 2)
-lines(sort(expit(-0.4 + 1*DAT_SUB$X)), col = 'black', lwd = 2)
-legend(x='topleft', fill = c('purple', 'red','blue', 'green', 'black'), legend = c('Estimated marginal sensitivity', 'Using non-logistic link method', 'Using obs. data log-lik', 'Using obs. data log-lik (fixed intercept)', 'Truth'), cex = 0.7)
+lines(sort(expit(-0.4 + 1*data.samp$X)), col = 'black', lwd = 2)
+legend(x='topleft', fill = c('purple', 'red','blue', 'green', 'black'),
+       legend = c('Estimated marginal sensitivity',
+                  'Using non-logistic link method',
+                  'Using obs. data log-lik',
+                  'Using obs. data log-lik (fixed intercept)',
+                  'Truth'), cex = 0.7)
 ```
 
-**Figure 3** shows the estimated individual-level sensitivity values across different marginal sampling ratio values. In reality, we will rarely know the truth, and this strategy can help us obtain reasonable values for sensitivity across plausible sampling ratio values.
+**Figure 3** shows the estimated individual-level sensitivity values across
+different marginal sampling ratio values. In reality, we will rarely know the
+truth, and this strategy can help us obtain reasonable values for sensitivity
+across plausible sampling ratio values.
 
 ```{r, echo = FALSE, eval = TRUE,  fig.width = 5, fig.height= 5,  results='hide'}
 rvals = c(1,1.5,2,2.5,5,10)
 COL = c('red', 'orange', 'yellow', 'green', 'blue', 'purple')
-true_prevs = predict(trueX, newdata = DAT_SUB, type = 'response')
-plot(sort(expit(-0.4 + 1*DAT_SUB$X)), xlab = 'Patients', ylab = 'Sensitivity', main = 'Figure 3: Estimated sensitivity across \n marginal sampling ratios', type = 'l', col = 'black', lwd = 2, ylim = c(0,1))
-for(i in 1:length(rvals)){
-  TEMP = sensitivity(X = DAT_SUB$X, Dstar = DAT_SUB$Dstar,  r = rvals[i], prev = true_prevs)
-  lines(sort(TEMP$c_X), col = COL[i])}
-legend(x='topleft', legend = c(rvals, 'Truth'), title = 'Sampling Ratio', fill = c(COL, 'black'), cex = 0.8)
+true_prevs = predict(trueX, newdata = data.samp, type = 'response')
+plot(sort(expit(-0.4 + 1*data.samp$X)), xlab = 'Patients', ylab = 'Sensitivity',
+main = 'Figure 3: Estimated sensitivity across \n marginal sampling ratios',
+type = 'l', col = 'black', lwd = 2, ylim = c(0,1))
+
+for (i in 1:length(rvals)) {
+  TEMP <- sensitivity(X = data.samp$X, Dstar = data.samp$Dstar,  r = rvals[i], prev = true_prevs)
+  lines(sort(TEMP$c_X), col = COL[i])
+}
+legend(x='topleft', legend = c(rvals, 'Truth'), title = 'Sampling Ratio',
+       fill = c(COL, 'black'), cex = 0.8)
 ```
 
 
@@ -242,7 +255,13 @@ library(ggplot2)
 library(scales)
 ```
 
-**Figure 4** shows the estimated log-odds ratio relating $D$ and $Z$ for the various analysis methods. Uncorrected (complete case with misclassified outcome) analysis produces bias, and some methods reduce this bias. Recall, this is a single simulated dataset, and the corrected estimators may not always equal the truth for a given simulation. When $W$ and $D$ are independently associated, the method using the approximated $D^* \vert Z$ relationship and marginal sensitivity can sometimes perform poorly.
+**Figure 4** shows the estimated log-odds ratio relating $D$ and $Z$ for the
+various analysis methods. Uncorrected (complete case with misclassified outcome)
+analysis produces bias, and some methods reduce this bias. Recall, this is a
+single simulated dataset, and the corrected estimators may not always equal
+the truth for a given simulation. When $W$ and $D$ are independently associated,
+the method using the approximated $D^* \vert Z$ relationship and marginal
+sensitivity can sometimes perform poorly.
 
 ```{r, echo = FALSE, eval = TRUE,  fig.width = 7, fig.height= 4}
 METHODS = c('True',  'Uncorrected', 'Approx D*|Z + IPW','Non-logistic Link + IPW','Obs. log-lik + IPW', 'Fixed intercept obs. log-lik + IPW')

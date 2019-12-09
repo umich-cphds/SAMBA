@@ -36,10 +36,10 @@
 #' matrix to get the fixed-parameter covariance matrix
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
+#' @param Z Numeric matrix of covariates in disease model
 #' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
 #'     to fit model with no covariates in sensitivity model. 'X' should not
 #'     contain an intercept
-#' @param Z Numeric matrix of covariates in disease model
 #' @param theta estimated value of theta from a call to misclass_max or
 #'     misclass_maxEM
 #' @param beta estimated value of beta from a call to misclass_max or
@@ -52,7 +52,7 @@
 #' @return Info estimated information matrix.
 #' @return variance estimated covariance matrix.
 #' @export
-obsloglik_var <- function(Dstar, X, Z, theta, beta, getInfo = FALSE,
+obsloglik_var <- function(Dstar, Z, X, theta, beta, getInfo = FALSE,
                           expectedInfo = TRUE)
 {
     if (!is.numeric(Dstar) || !is.vector(Dstar))

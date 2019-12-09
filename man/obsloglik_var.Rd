@@ -4,18 +4,18 @@
 \alias{obsloglik_var}
 \title{obsloglik_var}
 \usage{
-obsloglik_var(Dstar, X, Z, theta, beta, getInfo = FALSE,
+obsloglik_var(Dstar, Z, X, theta, beta, getInfo = FALSE,
   expectedInfo = TRUE)
 }
 \arguments{
 \item{Dstar}{Numeric vector containing observed disease status. Should be
 coded as 0/1}
 
+\item{Z}{Numeric matrix of covariates in disease model}
+
 \item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
 to fit model with no covariates in sensitivity model. 'X' should not
 contain an intercept}
-
-\item{Z}{Numeric matrix of covariates in disease model}
 
 \item{theta}{estimated value of theta from a call to misclass_max or
 misclass_maxEM}

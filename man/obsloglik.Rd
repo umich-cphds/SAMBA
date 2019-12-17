@@ -4,8 +4,8 @@
 \alias{obsloglik}
 \title{Calculate Observed Profile Log likelihood}
 \usage{
-obsloglik(Dstar, Z, X, param_current, weights = NULL,
-  beta0_fixed = NULL, itnmax = 5000)
+obsloglik(Dstar, Z, X, param_current, beta0_fixed = NULL,
+  weights = NULL, expected = TRUE, itnmax = 5000)
 }
 \arguments{
 \item{Dstar}{matrix or data frame containing observed disease status}
@@ -19,22 +19,25 @@ NULL to fit model with no covariates in sensitivity model}
 Theta is the parameter of the disease model, and beta is the parameter
 of the sensitivity model}
 
-\item{weights}{(optional) vector of subject-specific weights used for
-selection bias adjustment}
-
 \item{beta0_fixed}{(optional) vector of values of sensitivity model intercept
 to profile over. If a single value, corresponds to fixing intercept at
 specified value}
+
+\item{weights}{(optional) vector of subject-specific weights used for
+selection bias adjustment}
+
+\item{expected}{Whether or not to calculate the covariance matrix via the
+expected fisher information matrix. Default is TRUE}
 
 \item{itnmax}{Maximum number of iterations to run \code{optimx}}
 }
 \value{
 param vector with parameter estimates organized as (theta, beta)
 
-param_save matrix containing estimated parameter values corresponding
+param.seq matrix containing estimated parameter values corresponding
     to different values of beta0_fixed.
 
-loglik_save vector of log-likelihood values corresponding to
+loglik.seq vector of log-likelihood values corresponding to
    different values of beta0_fixed.
 }
 \description{

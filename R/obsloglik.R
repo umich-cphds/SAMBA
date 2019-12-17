@@ -39,15 +39,17 @@
 #'     specified value
 #' @param weights (optional) vector of subject-specific weights used for
 #'     selection bias adjustment
+#' @param expected Whether or not to calculate the covariance matrix via the
+#'     expected fisher information matrix. Default is TRUE
 #' @param itnmax Maximum number of iterations to run \code{optimx}
 #' @return param vector with parameter estimates organized as (theta, beta)
-#' @return param_save matrix containing estimated parameter values corresponding
+#' @return param.seq matrix containing estimated parameter values corresponding
 #'     to different values of beta0_fixed.
-#' @return loglik_save vector of log-likelihood values corresponding to
+#' @return loglik.seq vector of log-likelihood values corresponding to
 #'    different values of beta0_fixed.
 #' @export
-obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
-                      beta0_fixed = NULL, itnmax = 5000)
+obsloglik <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
+                          weights = NULL, expected = TRUE, itnmax = 5000)
 {
     if (!is.numeric(Dstar) || !is.vector(Dstar))
     stop("'Dstar' must be a numeric vector.")
@@ -81,7 +83,12 @@ obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
 
     check.weights(weights, n)
     if (is.null(weights))
-        weights <- rep(1, n)
+        w <- rep(1, n)
+    else
+        w <- weights
+
+    if (!is.logical(expected) || length(expected) > 1)
+        stop("'expected' must be a length one logical.")
 
     if (!is.numeric(itnmax) || length(itnmax) > 1)
         stop("'itnmax' must be a single number.")
@@ -100,8 +107,8 @@ obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
     }
 
     # Loop over profile values
-    param_save  <- c()
-    loglik_save <- c()
+    param.seq  <- c()
+    loglik.seq <- c()
     for (val in values) {
         #Allows us to fit intercept only model for sensitivity
         if (is.null(X)) {
@@ -115,14 +122,27 @@ obsloglik <- function(Dstar, Z, X, param_current, weights = NULL,
                               list(maximize = TRUE, save.failures = F, trace = 0),
                               itnmax = itnmax, method = c("BFGS", "Nelder-Mead"),
                               args = list(Z = Z, X = X, Dstar = Dstar, opt =
-                                          opt_long, weights = weights))
+                                          opt_long, w = w))
 
         i <- which.max(opt$value)
-        param_save  <- rbind(param_save, stats::coef(opt)[i, ])
-        loglik_save <- c(loglik_save, opt$value[i])
+        param.seq  <- rbind(param.seq, stats::coef(opt)[i, ])
+        loglik.seq <- c(loglik.seq, opt$value[i])
     }
-    param_new = param_save[which.max(loglik_save),]
-    list(param = param_new, param_save = param_save, loglik_save = loglik_save)
+    param <- param.seq[which.max(loglik.seq),]
+
+    theta <- param[1:(ncol(Z) + 1)]
+    beta  <- param[-(1:(ncol(Z) + 1))]
+
+    if (is.null(weights)) {
+        var <- obsloglik_var(Dstar, Z, X, theta, beta, beta0_fixed, expected)
+    } else {
+        var <- obsloglik_var_weighted(Dstar, Z, X, theta, beta, beta0_fixed,
+                                      weights, expected)
+    }
+
+    structure(list(param = param, var = var, param.seq = param.seq, loglik.seq =
+                   loglik.seq, Dstar = Dstar, X = X, Z = Z, weights = weights,
+                   beta0_fixed = beta0_fixed), class = "SAMBA.fit")
 }
 
 max_obsloglik <- function(param, args)
@@ -135,6 +155,6 @@ max_obsloglik <- function(param, args)
     M      <- expit(Xbeta) * expit(Ztheta)
 
     Dstar   <- args$Dstar
-    weights <- args$weights
-    sum(weights * Dstar * log(M) + weights * (1 - Dstar) * log(1 - M))
+    w <- args$w
+    sum(w * Dstar * log(M) + w * (1 - Dstar) * log(1 - M))
 }

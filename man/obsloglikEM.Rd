@@ -7,7 +7,7 @@ This function can be used to jointly estimate disease model and sensitivity
 model parameters using an expectation-maximization algorithm.}
 \usage{
 obsloglikEM(Dstar, Z, X, param_current, beta0_fixed = NULL,
-  weights = NULL, tol = 1e-06, maxit = 50)
+  weights = NULL, expected = TRUE, tol = 1e-06, maxit = 50)
 }
 \arguments{
 \item{Dstar}{matrix or data frame containing observed disease status}
@@ -27,6 +27,9 @@ sensitivity model.}
 
 \item{weights}{(optional) vector of subject-specific weights used for
 selection bias adjustment.}
+
+\item{expected}{Whether or not to calculate the covariance matrix via the
+expected fisher information matrix. Default is TRUE}
 
 \item{tol}{stop estimation when subsequent log-likelihood estimates are
 within this value}

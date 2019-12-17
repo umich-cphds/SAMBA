@@ -183,28 +183,14 @@ start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
 fit <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
                  weights = weights)
 
-var <- obsloglik_weightedvar(data.samp$Dstar, data.samp$Z, data.samp$X, theta =   
-                             fit$param[1:2], beta = fit$param[3:4], weights =
-                             weights, getInfo = FALSE)
-
-variance   <- diag(var)
-obsloglik1 <- list(param = fit$param, variance = variance)
+obsloglik1 <- list(param = fit$param, variance = diag(fit$var))
 
 # Direct observed data likelihood maximization with fixed intercept
-start <- as.numeric(c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2]))
+start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
 fit   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
                  beta0_fixed = logit(sens1$c_marg), weights = weights)
 
-info <- obsloglik_weightedvar(data.samp$Dstar, data.samp$Z , data.samp$X,
-                              theta = fit$param[1:2], beta = fit$param[3:4],
-                              weights = weights, getInfo = TRUE)
-
-bread <- solve(info$inv_bread[c(1, 2, 4), c(1, 2, 4)])
-meat  <- info$meat[c(1, 2, 4), c(1, 2, 4)]
-
-# sandwich estimator excluding fixed intercept
-var        <- diag(bread %*% meat %*% bread)
-obsloglik2 <- list(param = fit$param, variance = variance)
+obsloglik2 <- list(param = fit$param, variance = diag(fit$var))
 ```
 ## Plotting sensitivity estimates
 

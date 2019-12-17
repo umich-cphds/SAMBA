@@ -35,6 +35,8 @@
 #'     sensitivity model.
 #' @param weights (optional) vector of subject-specific weights used for
 #'     selection bias adjustment.
+#' @param expected Whether or not to calculate the covariance matrix via the
+#'     expected fisher information matrix. Default is TRUE
 #' @param tol stop estimation when subsequent log-likelihood estimates are
 #'     within this value
 #' @param maxit maximum number of iterations of the estimation algorithm
@@ -45,7 +47,7 @@
 #'     expectation algorithm
 #' @export
 obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
-                        weights = NULL, tol = 1e-6, maxit = 50)
+                        weights = NULL, expected = TRUE, tol = 1e-6, maxit = 50)
 {
     if (is.data.frame(Z))
         Z <- as.matrix(Z)
@@ -79,7 +81,12 @@ obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
 
     check.weights(weights, n)
     if (is.null(weights))
-        weights <- rep(1, n)
+        w <- rep(1, n)
+    else
+        w <- weights
+
+    if (!is.logical(expected) || length(expected) > 1)
+        stop("'expected' must be a length one logical.")
 
     # initialise p for EM
     theta <- param_current[1:(1 + ncol(Z))]
@@ -99,14 +106,12 @@ obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
 
     param.seq  <- c(theta, beta0_fixed, beta)
     loglik.seq <- -10 ^ 9
-    if (is.null(weights))
-        weights <- rep(1, nrow(X))
     while (!converged && it < maxit) {
         if (is.null(beta0_fixed)) {
-            fit.beta <- stats::glm(Dstar ~ X, weights = p * weights,
+            fit.beta <- stats::glm(Dstar ~ X, weights = p * w,
                                    family = stats::binomial())
         } else {
-            fit.beta <- stats::glm(Dstar ~ 0 + X, weights = p * weights,
+            fit.beta <- stats::glm(Dstar ~ 0 + X, weights = p * w,
                                    offset = rep(beta0_fixed, length(p)),
                                    family = stats::binomial())
         }
@@ -117,8 +122,8 @@ obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
         pred2 <- stats::predict(fit.beta, type = 'response')
         p     <- calculate.p(pred1, pred2)
 
-        loglik <- sum(weights * Dstar * log(pred1 * pred2) +
-                      weights * (1 - Dstar) * log(1 - (pred1 * pred2))
+        loglik <- sum(w * Dstar * log(pred1 * pred2) +
+                      w * (1 - Dstar) * log(1 - (pred1 * pred2))
         )
         loglik.seq <- c(loglik.seq, loglik)
 
@@ -131,5 +136,18 @@ obsloglikEM <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
     }
 
     param <- c(stats::coef(fit.theta), beta0_fixed, stats::coef(fit.beta))
-    list(param = param, param.seq = param.seq, loglik.seq = loglik.seq)
+    theta <- param[1:(ncol(Z) + 1)]
+    beta  <- param[-(1:(ncol(Z) + 1))]
+
+    if (is.null(weights)) {
+        var <- obsloglik_var(Dstar, Z, X, theta, beta, beta0_fixed, expected)
+    } else {
+        var <- obsloglik_var_weighted(Dstar, Z, X, theta, beta, beta0_fixed,
+                                      weights, expected)
+    }
+
+    structure(list(param = param, var = var, param.seq = param.seq, loglik.seq =
+                   loglik.seq, Dstar = Dstar, X = X, Z = Z, weights = weights,
+                   beta0_fixed = beta0_fixed), class = "SAMBA.fit")
+
 }

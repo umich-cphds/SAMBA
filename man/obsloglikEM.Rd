@@ -6,27 +6,28 @@
 This function can be used to jointly estimate disease model and sensitivity
 model parameters using an expectation-maximization algorithm.}
 \usage{
-obsloglikEM(Dstar, Z, X, param_current, beta0_fixed = NULL,
-  weights = NULL, expected = TRUE, tol = 1e-06, maxit = 50)
+obsloglikEM(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
+  expected = TRUE, tol = 1e-06, maxit = 50)
 }
 \arguments{
-\item{Dstar}{matrix or data frame containing observed disease status}
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
 
-\item{Z}{matrix or data frame with covariates in disease model}
+\item{Z}{Numeric matrix of covariates in disease model}
 
-\item{X}{Numeric matrix with covariates in sensitivity model. Set to NULL
-to fit model with no covariates in sensitivity model. 'X' should not
-contain an intercept.}
+\item{X}{Numeric matrix of covariates in sensitivity model. Set to
+NULL to fit model with no covariates in sensitivity model}
 
-\item{param_current}{vector of starting values for theta and beta
-(theta, beta). Theta is the parameter of the disease model, and beta is
-the parameter of the sensitivity model.}
+\item{start}{Numeric vector of starting values for theta and beta (theta, beta).
+Theta is the parameter of the disease model, and beta is the parameter
+of the sensitivity model}
 
-\item{beta0_fixed}{(optional) fixed value for the intercept of the
-sensitivity model.}
+\item{beta0_fixed}{Optional numeric vector of values of sensitivity model
+intercept to profile over. If a single value, corresponds to fixing
+intercept at specified value. Default is NULL}
 
-\item{weights}{(optional) vector of subject-specific weights used for
-selection bias adjustment.}
+\item{weights}{Optional vector of subject-specific weights used for
+selection bias adjustment. Default is NULL}
 
 \item{expected}{Whether or not to calculate the covariance matrix via the
 expected fisher information matrix. Default is TRUE}
@@ -34,7 +35,7 @@ expected fisher information matrix. Default is TRUE}
 \item{tol}{stop estimation when subsequent log-likelihood estimates are
 within this value}
 
-\item{maxit}{maximum number of iterations of the estimation algorithm}
+\item{maxit}{Maximum number of iterations of the estimation algorithm}
 }
 \value{
 param vector with parameter estimates organized as (theta, beta)
@@ -42,8 +43,10 @@ param vector with parameter estimates organized as (theta, beta)
 param.seq matrix containing estimated parameter values across
     iterations of the expectation algorithm
 
-loglik.seq vector of log-likelihood values across iterations of the
-    expectation algorithm
+A "SAMBA.fit" object with nine elements: 'param', the final estimate
+of the coeficients,  'var', the covariance matrix of the final estimate,
+param.seq', sequence of estimates at each step of the EM algorithm, and
+Dstar', 'X', 'Z', and 'weights'.
 }
 \description{
 We are interested in modeling the relationship between binary disease status
@@ -52,18 +55,22 @@ misclassified, and our observed data may not well-represent the population
 of interest. In this setting, we estimate parameters from the disease model
 using the following modeling framework.
 Notation:
-D = binary disease status of interest
-Dstar = observed binary disease status. Potentially a misclassified version
-of D. We assume D=0 implies Dstar=0.
-S = indicator for whether patient from population of interest is included
-in the analytical dataset
-Z = covariates in disease model of interest
-W = covariates in model for patient inclusion in analytical dataset
-(selection model)
-X = covariates in model for probability of observing disease given patient
-has disease (sensitivity model)
+\describe{
+    \item{D}{Binary disease status of interest.}
+    \item{Dstar}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{S}{Indicator for whether patient from population of interest is
+             included in the analytical dataset.}
+    \item{Z}{Covariates in disease model of interest.}
+    \item{W}{Covariates in model for patient inclusion in analytical dataset
+             (selection model).}
+    \item{X}{Covariates in model for probability of observing disease given
+             patient has disease (sensitivity model).}
+}
 Model Structure:
-Disease Model: logit(P(D=1|X)) = theta_0 + theta_Z Z
-Selection Model: P(S=1|W,D)
-Sensitivity Model: logit(P(Dstar=1|D=1,X)) = beta_0 + beta_X X
+\describe{
+\item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
+\item{Selection Model}{\deqn{P(S=1|W,D)}}
+\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+}
 }

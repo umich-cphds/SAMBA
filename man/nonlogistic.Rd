@@ -11,18 +11,17 @@ nonlogistic(Dstar, Z, c_X, weights = NULL)
 \item{Dstar}{Numeric vector containing observed disease status. Should be
 coded as 0/1}
 
-\item{Z}{matrix or data frame with covariates in disease model}
+\item{Z}{numeric matrix of covariates in disease model}
 
-\item{c_X}{sensitivity as a function of X, P(observe disease | have disease, X)}
+\item{c_X}{sensitivity as a function of X, P(D^* | D, X)}
 
 \item{weights}{(optional) vector of subject-specific weights used for
 selection bias adjustment.}
 }
 \value{
-param vector with parameter estimates for disease model
-  (intercept, logOR of Z)
-
-variance vector of variance estimates for disease model
+A list with two elements: 'param', a vector with parameter estimates
+    for disease model(intercept, logOR of Z), and 'variance', a vector of
+    variance estimates for disease model
 }
 \description{
 \code{nonlogistic} fits a logistic regression model for D given Z using a

@@ -18,14 +18,14 @@ coded as 0/1}
 selection bias adjustment. Default is NULL}
 }
 \value{
-a list with two elements: 'param', a vector with parameter estimates
+A list with two elements: 'param', a vector with parameter estimates
     for disease model(intercept, logOR of Z), and 'variance', a vector of
     variance estimates for disease model
 }
 \description{
-This function can be used to estimate parameters in the disease model given
-a previously-estimated marginal sensitivity. This estimation is based on
-approximating the distribution of Dstar given Z.
+\code{approxdist} can be used to estimate parameters in the disease model
+given a previously-estimated marginal sensitivity. This estimation is based
+on approximating the distribution of Dstar given Z.
 }
 \details{
 We are interested in modeling the relationship between binary disease status

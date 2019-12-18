@@ -1,8 +1,8 @@
 #' approxdist
 #'
-#' This function can be used to estimate parameters in the disease model given
-#' a previously-estimated marginal sensitivity. This estimation is based on
-#' approximating the distribution of Dstar given Z.
+#' \code{approxdist} can be used to estimate parameters in the disease model
+#' given a previously-estimated marginal sensitivity. This estimation is based
+#' on approximating the distribution of Dstar given Z.
 #'
 #' We are interested in modeling the relationship between binary disease status
 #' and covariates Z using a logistic regression model. However, D may be
@@ -35,7 +35,7 @@
 #' @param weights Optional vector of subject-specific weights used for
 #'     selection bias adjustment. Default is NULL
 #' @param c_marg Marginal sensitivity, P(D^* | D)
-#' @return a list with two elements: 'param', a vector with parameter estimates
+#' @return A list with two elements: 'param', a vector with parameter estimates
 #'     for disease model(intercept, logOR of Z), and 'variance', a vector of
 #'     variance estimates for disease model
 #' @export

@@ -4,27 +4,28 @@
 \alias{obsloglik}
 \title{Calculate Observed Profile Log likelihood}
 \usage{
-obsloglik(Dstar, Z, X, param_current, beta0_fixed = NULL,
-  weights = NULL, expected = TRUE, itnmax = 5000)
+obsloglik(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
+  expected = TRUE, itnmax = 5000)
 }
 \arguments{
-\item{Dstar}{matrix or data frame containing observed disease status}
+\item{Dstar}{Numeric vector containing observed disease status. Should be
+coded as 0/1}
 
-\item{Z}{Numeric matrix with covariates in disease model}
+\item{Z}{Numeric matrix of covariates in disease model}
 
-\item{X}{Numeric Matrix with covariates in sensitivity model. Set to
+\item{X}{Numeric Matrix of covariates in sensitivity model. Set to
 NULL to fit model with no covariates in sensitivity model}
 
-\item{param_current}{vector of starting values for theta and beta (theta, beta).
+\item{start}{Numeric vector of starting values for theta and beta (theta, beta).
 Theta is the parameter of the disease model, and beta is the parameter
 of the sensitivity model}
 
-\item{beta0_fixed}{(optional) vector of values of sensitivity model intercept
-to profile over. If a single value, corresponds to fixing intercept at
-specified value}
+\item{beta0_fixed}{Optional numeric vector of values of sensitivity model
+intercept to profile over. If a single value, corresponds to fixing
+intercept at specified value. Default is NULL}
 
-\item{weights}{(optional) vector of subject-specific weights used for
-selection bias adjustment}
+\item{weights}{Optional vector of subject-specific weights used for
+selection bias adjustment. Default is NULL}
 
 \item{expected}{Whether or not to calculate the covariance matrix via the
 expected fisher information matrix. Default is TRUE}
@@ -32,13 +33,11 @@ expected fisher information matrix. Default is TRUE}
 \item{itnmax}{Maximum number of iterations to run \code{optimx}}
 }
 \value{
-param vector with parameter estimates organized as (theta, beta)
-
-param.seq matrix containing estimated parameter values corresponding
-    to different values of beta0_fixed.
-
-loglik.seq vector of log-likelihood values corresponding to
-   different values of beta0_fixed.
+A "SAMBA.fit" object with nine elements: 'param', the maximum
+likelihood estimate of the coeficients,  'var', the covariance matrix of the
+final estimate, param.seq', the sequence of estimates at each value of beta0,
+and 'loglik.seq', the log likelihood at each value. The rest of the elements
+are Dstar', 'X', 'Z', and 'weights'.
 }
 \description{
 \code{obsloglik} jointly estimates the disease model and sensitivity

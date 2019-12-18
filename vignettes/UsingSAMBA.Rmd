@@ -180,14 +180,14 @@ nonlog1 <- nonlogistic(data.samp$Dstar, data.samp$Z, c_X = sens3$c_X,
 
 # Direct observed data likelihood maximization without fixed intercept
 start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
-fit <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
+fit <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
                  weights = weights)
 
 obsloglik1 <- list(param = fit$param, variance = diag(fit$var))
 
 # Direct observed data likelihood maximization with fixed intercept
 start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
-fit   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, param_current = start,
+fit   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
                  beta0_fixed = logit(sens1$c_marg), weights = weights)
 
 obsloglik2 <- list(param = fit$param, variance = diag(fit$var))

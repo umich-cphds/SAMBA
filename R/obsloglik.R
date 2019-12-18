@@ -27,28 +27,29 @@
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
 #' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
 #' }
-#' @param Z Numeric matrix with covariates in disease model
-#' @param X Numeric Matrix with covariates in sensitivity model. Set to
+#' @param Dstar Numeric vector containing observed disease status. Should be
+#'     coded as 0/1
+#' @param Z Numeric matrix of covariates in disease model
+#' @param X Numeric Matrix of covariates in sensitivity model. Set to
 #'     NULL to fit model with no covariates in sensitivity model
-#' @param Dstar matrix or data frame containing observed disease status
-#' @param param_current vector of starting values for theta and beta (theta, beta).
+#' @param start Numeric vector of starting values for theta and beta (theta, beta).
 #'     Theta is the parameter of the disease model, and beta is the parameter
 #'     of the sensitivity model
-#' @param beta0_fixed (optional) vector of values of sensitivity model intercept
-#'     to profile over. If a single value, corresponds to fixing intercept at
-#'     specified value
-#' @param weights (optional) vector of subject-specific weights used for
-#'     selection bias adjustment
+#' @param beta0_fixed Optional numeric vector of values of sensitivity model
+#'     intercept to profile over. If a single value, corresponds to fixing
+#'     intercept at specified value. Default is NULL
+#' @param weights Optional vector of subject-specific weights used for
+#'     selection bias adjustment. Default is NULL
 #' @param expected Whether or not to calculate the covariance matrix via the
 #'     expected fisher information matrix. Default is TRUE
 #' @param itnmax Maximum number of iterations to run \code{optimx}
-#' @return param vector with parameter estimates organized as (theta, beta)
-#' @return param.seq matrix containing estimated parameter values corresponding
-#'     to different values of beta0_fixed.
-#' @return loglik.seq vector of log-likelihood values corresponding to
-#'    different values of beta0_fixed.
+#' @return A "SAMBA.fit" object with nine elements: 'param', the maximum
+#' likelihood estimate of the coeficients,  'var', the covariance matrix of the
+#' final estimate, param.seq', the sequence of estimates at each value of beta0,
+#' and 'loglik.seq', the log likelihood at each value. The rest of the elements
+#' are Dstar', 'X', 'Z', and 'weights'.
 #' @export
-obsloglik <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
+obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
                           weights = NULL, expected = TRUE, itnmax = 5000)
 {
     if (!is.numeric(Dstar) || !is.vector(Dstar))
@@ -97,7 +98,7 @@ obsloglik <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
     if (is.null(beta0_fixed)) {
         lower  <- logit(0.2)
         upper  <- logit(0.99)
-        values <- as.vector(seq(lower, upper, 0.1))
+        values <- seq(lower, upper, 0.1)
     } else if (length(beta0_fixed) == 1) {
         lower  <- beta0_fixed
         upper  <- beta0_fixed
@@ -117,8 +118,8 @@ obsloglik <- function(Dstar, Z, X, param_current, beta0_fixed = NULL,
             opt_long <- c(rep(NA, (1 + ncol(Z))), val, rep(NA, ncol(X)))
         }
 
-        param_current[2 + ncol(Z)] <- val
-        opt <- optimx::optimx(param_current, max_obsloglik, control =
+        start[2 + ncol(Z)] <- val
+        opt <- optimx::optimx(start, max_obsloglik, control =
                               list(maximize = TRUE, save.failures = F, trace = 0),
                               itnmax = itnmax, method = c("BFGS", "Nelder-Mead"),
                               args = list(Z = Z, X = X, Dstar = Dstar, opt =

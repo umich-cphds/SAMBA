@@ -31,13 +31,13 @@
 #' }
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
-#' @param Z matrix or data frame with covariates in disease model
+#' @param Z numeric matrix of covariates in disease model
 #' @param weights (optional) vector of subject-specific weights used for
 #'     selection bias adjustment.
-#' @param c_X sensitivity as a function of X, P(observe disease | have disease, X)
-#' @return param vector with parameter estimates for disease model
-#'   (intercept, logOR of Z)
-#' @return variance vector of variance estimates for disease model
+#' @param c_X sensitivity as a function of X, P(D^* | D, X)
+#' @return A list with two elements: 'param', a vector with parameter estimates
+#'     for disease model(intercept, logOR of Z), and 'variance', a vector of
+#'     variance estimates for disease model
 #' @export
 nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
 {

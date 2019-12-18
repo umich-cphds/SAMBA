@@ -29,7 +29,7 @@ A list with two elements: `c_marg`, marginal sensitivity estimate
 \eqn{P(D^*| D)} and `c_X`, sensitivity as a function of X, \eqn{P(D^*| D, X)}
 }
 \description{
-Estimate the marginal sensitivity and sensitivity as a function of
+\code{sensitivity} estimates the marginal sensitivity and sensitivity as a function of
 covariates X for a misclassified binary outcome.
 }
 \details{

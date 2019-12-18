@@ -1,5 +1,6 @@
-#' obsloglikEM
-#' This function can be used to jointly estimate disease model and sensitivity
+#' Joinly estimate the disease and sensitivity models via EM
+#'
+#' \code{obsloglikEM} jointly estimates the disease model and the sensitivity
 #' model parameters using an expectation-maximization algorithm.
 #'
 #' We are interested in modeling the relationship between binary disease status

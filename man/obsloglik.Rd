@@ -2,7 +2,7 @@
 % Please edit documentation in R/obsloglik.R
 \name{obsloglik}
 \alias{obsloglik}
-\title{Calculate Observed Profile Log likelihood}
+\title{Joinly estimate the disease and sensitivity models via profile likelihood}
 \usage{
 obsloglik(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
   expected = TRUE, itnmax = 5000)

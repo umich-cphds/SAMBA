@@ -1,4 +1,5 @@
-#' approxdist
+#' Estimate parameters in the disease model given a previously-estimated
+#' sensitivity.
 #'
 #' \code{approxdist} can be used to estimate parameters in the disease model
 #' given a previously-estimated marginal sensitivity. This estimation is based

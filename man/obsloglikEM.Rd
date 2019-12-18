@@ -2,9 +2,7 @@
 % Please edit documentation in R/obsloglikEM.R
 \name{obsloglikEM}
 \alias{obsloglikEM}
-\title{obsloglikEM
-This function can be used to jointly estimate disease model and sensitivity
-model parameters using an expectation-maximization algorithm.}
+\title{Joinly estimate the disease and sensitivity models via EM}
 \usage{
 obsloglikEM(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
   expected = TRUE, tol = 1e-06, maxit = 50)
@@ -49,6 +47,10 @@ param.seq', sequence of estimates at each step of the EM algorithm, and
 Dstar', 'X', 'Z', and 'weights'.
 }
 \description{
+\code{obsloglikEM} jointly estimates the disease model and the sensitivity
+model parameters using an expectation-maximization algorithm.
+}
+\details{
 We are interested in modeling the relationship between binary disease status
 and covariates Z using a logistic regression model. However, D may be
 misclassified, and our observed data may not well-represent the population

@@ -1,6 +1,6 @@
 #' sensitivity
 #'
-#' Estimate the marginal sensitivity and sensitivity as a function of
+#' \code{sensitivity} estimates the marginal sensitivity and sensitivity as a function of
 #' covariates X for a misclassified binary outcome.
 #'
 #' We are interested in modeling the relationship between binary disease status

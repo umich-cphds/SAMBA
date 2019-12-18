@@ -1,4 +1,4 @@
-#' Calculate Observed Profile Log likelihood
+#' Joinly estimate the disease and sensitivity models via profile likelihood
 #'
 #' \code{obsloglik} jointly estimates the disease model and sensitivity
 #' model parameters using profile likelihood methods.

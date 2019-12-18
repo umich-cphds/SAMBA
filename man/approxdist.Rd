@@ -2,7 +2,8 @@
 % Please edit documentation in R/approxdist.R
 \name{approxdist}
 \alias{approxdist}
-\title{approxdist}
+\title{Estimate parameters in the disease model given a previously-estimated
+sensitivity.}
 \usage{
 approxdist(Dstar, Z, c_marg, weights = NULL)
 }

@@ -2,7 +2,8 @@
 % Please edit documentation in R/obsloglikEM.R
 \name{obsloglikEM}
 \alias{obsloglikEM}
-\title{Joinly estimate the disease and sensitivity models via EM}
+\title{Estimate parameters in the disease model using observed data log-likelihood
+using the expectation-maximization algorithm}
 \usage{
 obsloglikEM(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
   expected = TRUE, tol = 1e-06, maxit = 50)
@@ -14,7 +15,8 @@ coded as 0/1}
 \item{Z}{Numeric matrix of covariates in disease model}
 
 \item{X}{Numeric matrix of covariates in sensitivity model. Set to
-NULL to fit model with no covariates in sensitivity model}
+NULL to fit model with no covariates in sensitivity model. 'X' should not
+contain an intercept}
 
 \item{start}{Numeric vector of starting values for theta and beta (theta, beta).
 Theta is the parameter of the disease model, and beta is the parameter
@@ -24,7 +26,7 @@ of the sensitivity model}
 intercept to profile over. If a single value, corresponds to fixing
 intercept at specified value. Default is NULL}
 
-\item{weights}{Optional vector of subject-specific weights used for
+\item{weights}{Optional vector of patient-specific weights used for
 selection bias adjustment. Default is NULL}
 
 \item{expected}{Whether or not to calculate the covariance matrix via the
@@ -36,19 +38,16 @@ within this value}
 \item{maxit}{Maximum number of iterations of the estimation algorithm}
 }
 \value{
-param vector with parameter estimates organized as (theta, beta)
-
-param.seq matrix containing estimated parameter values across
-    iterations of the expectation algorithm
-
 A "SAMBA.fit" object with nine elements: 'param', the final estimate
-of the coeficients,  'var', the covariance matrix of the final estimate,
-param.seq', sequence of estimates at each step of the EM algorithm, and
-Dstar', 'X', 'Z', and 'weights'.
+of the coeficients organized as (theta, beta),  'variance', the covariance
+matrix of the final estimate, param.seq', the sequence of estimates at each
+step of the EM algorithm, and 'loglik.seq', the log likelihood at each step.
+The rest of the elements are Dstar', 'X', 'Z', and 'weights'.
 }
 \description{
-\code{obsloglikEM} jointly estimates the disease model and the sensitivity
-model parameters using an expectation-maximization algorithm.
+\code{obsloglikEM} jointly estimates the disease model and sensitivity
+model parameters using profile likelihood methods. Estimation involves
+an expectation-maximization algorithm.
 }
 \details{
 We are interested in modeling the relationship between binary disease status
@@ -59,8 +58,8 @@ using the following modeling framework.
 Notation:
 \describe{
     \item{D}{Binary disease status of interest.}
-    \item{Dstar}{Observed binary disease status. Potentially a misclassified
-                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{D*}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies D* = 0.}
     \item{S}{Indicator for whether patient from population of interest is
              included in the analytical dataset.}
     \item{Z}{Covariates in disease model of interest.}
@@ -73,6 +72,6 @@ Model Structure:
 \describe{
 \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
-\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+\item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 }
 }

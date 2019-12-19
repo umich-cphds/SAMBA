@@ -6,9 +6,6 @@ logistic regression models
 ```{r}
 devtools::install_github("umich-cphds/SAMBA", build_opts = c())
 ```
-# Example
-TODO
-
 # Questions
 For questions and comments about the implementation, please contact Alexander
 Rix (alexrix@umich.edu). For questions about the method, contact Lauren Beesley

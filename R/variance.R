@@ -107,28 +107,28 @@ obsloglik_var_weighted <- function(Dstar, Z, X, theta, beta, beta0_fixed,
     # Calculate information matrix
     if (expected) {
         tmp <- 1 / (K1 * (1 - K1))
-        meat.bb <- -dK1.dB * dK1.dB * tmp
-        meat.bt <- -dK1.dB * dK1.dT * tmp
-        meat.tt <- -dK1.dT * dK1.dT * tmp
+        bread.bb <- -dK1.dB * dK1.dB * tmp
+        bread.bt <- -dK1.dB * dK1.dT * tmp
+        bread.tt <- -dK1.dT * dK1.dT * tmp
     } else {
         tmp <- 1 / K1 ^ 2
-        meat.bb <- Dstar * (K1 * dK1.dBdB - dK1.dB * dK1.dB) * tmp
-        meat.bt <- Dstar * (K1 * dK1.dBdT - dK1.dB * dK1.dT) * tmp
-        meat.tt <- Dstar * (K1 * dK1.dTdT - dK1.dT * dK1.dT) * tmp
+        bread.bb <- Dstar * (K1 * dK1.dBdB - dK1.dB * dK1.dB) * tmp
+        bread.bt <- Dstar * (K1 * dK1.dBdT - dK1.dB * dK1.dT) * tmp
+        bread.tt <- Dstar * (K1 * dK1.dTdT - dK1.dT * dK1.dT) * tmp
 
         tmp <- 1 / (1 - K1) ^ 2
-        meat.bb <- meat.bb - (1 - Dstar) * (1 - K1) * dK1.dBdB +
+        bread.bb <- bread.bb - (1 - Dstar) * (1 - K1) * dK1.dBdB +
                        dK1.dB * dK1.dB * tmp
-        meat.bt <- meat.bt - (1 - Dstar) * (1 - K1) * dK1.dBdT +
+        bread.bt <- bread.bt - (1 - Dstar) * (1 - K1) * dK1.dBdT +
                        dK1.dB * dK1.dT * tmp
-        meat.tt <- meat.tt - (1 - Dstar) * (1 - K1) * dK1.dTdT +
+        bread.tt <- bread.tt - (1 - Dstar) * (1 - K1) * dK1.dTdT +
                        dK1.dT * dK1.dT * tmp
     }
 
     # BREAD
-    I.betabeta <- t(apply(X1, 2, function(x) x * weights * meat.bb)) %*% X1
-    I.betatheta <- t(apply(X1, 2, function(x) x * weights * meat.bt)) %*% Z1
-    I.thetatheta <- t(apply(Z1, 2, function(x) x * weights * meat.tt)) %*% Z1
+    I.betabeta <- t(apply(X1, 2, function(x) x * weights * bread.bb)) %*% X1
+    I.betatheta <- t(apply(X1, 2, function(x) x * weights * bread.bt)) %*% Z1
+    I.thetatheta <- t(apply(Z1, 2, function(x) x * weights * bread.tt)) %*% Z1
     info <- rbind(cbind(I.thetatheta, t(I.betatheta)),
                   cbind(I.betatheta, I.betabeta))
 

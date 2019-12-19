@@ -1,7 +1,9 @@
-#' Joinly estimate the disease and sensitivity models via profile likelihood
+#' Estimate parameters in the disease model using observed data log-likelihood
+#' using direct maximization.
 #'
 #' \code{obsloglik} jointly estimates the disease model and sensitivity
-#' model parameters using profile likelihood methods.
+#' model parameters using profile likelihood methods. Estimation involves
+#' direct maximization of the observed data log-likelihood.
 #'
 #' We are interested in modeling the relationship between binary disease status
 #' and covariates Z using a logistic regression model. However, D may be
@@ -11,8 +13,8 @@
 #' Notation:
 #' \describe{
 #'     \item{D}{Binary disease status of interest.}
-#'     \item{Dstar}{Observed binary disease status. Potentially a misclassified
-#'                  version of D. We assume D = 0 implies Dstar = 0.}
+#'     \item{D*}{Observed binary disease status. Potentially a misclassified
+#'                  version of D. We assume D = 0 implies D* = 0.}
 #'     \item{S}{Indicator for whether patient from population of interest is
 #'              included in the analytical dataset.}
 #'     \item{Z}{Covariates in disease model of interest.}
@@ -25,7 +27,7 @@
 #' \describe{
 #' \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
-#' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+#' \item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 #' }
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
@@ -38,16 +40,16 @@
 #' @param beta0_fixed Optional numeric vector of values of sensitivity model
 #'     intercept to profile over. If a single value, corresponds to fixing
 #'     intercept at specified value. Default is NULL
-#' @param weights Optional vector of subject-specific weights used for
+#' @param weights Optional vector of patient-specific weights used for
 #'     selection bias adjustment. Default is NULL
 #' @param expected Whether or not to calculate the covariance matrix via the
 #'     expected fisher information matrix. Default is TRUE
 #' @param itnmax Maximum number of iterations to run \code{optimx}
 #' @return A "SAMBA.fit" object with nine elements: 'param', the maximum
-#' likelihood estimate of the coeficients,  'var', the covariance matrix of the
-#' final estimate, param.seq', the sequence of estimates at each value of beta0,
-#' and 'loglik.seq', the log likelihood at each value. The rest of the elements
-#' are Dstar', 'X', 'Z', and 'weights'.
+#' likelihood estimate of the coeficients,  'variance', the covariance matrix of
+#' the final estimate, param.seq', the sequence of estimates at each value of
+#' beta0, and 'loglik.seq', the log likelihood at each value. The rest of the
+#' elements are Dstar', 'X', 'Z', and 'weights'.
 #' @export
 obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
                           weights = NULL, expected = TRUE, itnmax = 5000)
@@ -143,7 +145,7 @@ obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
 
     structure(list(param = param, var = var, param.seq = param.seq, loglik.seq =
                    loglik.seq, Dstar = Dstar, X = X, Z = Z, weights = weights,
-                   beta0_fixed = beta0_fixed), class = "SAMBA.fit")
+                   beta0_fixed = values), class = "SAMBA.fit")
 }
 
 max_obsloglik <- function(param, args)

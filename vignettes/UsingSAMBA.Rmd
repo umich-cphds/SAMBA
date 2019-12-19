@@ -17,16 +17,18 @@ knitr::opts_chunk$set(
 ```
 
 In this vignette, we provide a brief introduction to using the R package *SAMBA*
-(sampling and misclassification bias adjustment). The purpose of this package is
+(selection and misclassification bias adjustment). The purpose of this package is
 to provide resources for fitting a logistic regression for a binary outcome in
 the presence of outcome misclassification (in particular, imperfect sensitivity)
 along with potential selection bias. We will not include technical details about
 this estimation approach and instead focus on implementation. For additional
-details about the estimation algorithm, we refer the reader to Beesley and
-Mukherjee (2020) in *UNDER REVIEW*.
+details about the estimation algorithm, we refer the reader to ``Statistical
+inference for association studies using electronic health records: handling both
+selection bias and outcome misclassification'' by Lauren J Beesley and
+Bhramar Mukherjee on bioRXiv.
 
 
-## Model Structure
+## Model structure
 
 Let binary $D$ represent a patient's true disease status for a disease of
 interest, e.g. diabetes. Suppose we are interested in the relationship between
@@ -69,7 +71,7 @@ $$\text{Disease Model}: \text{logit}(P(D=1 \vert Z; \theta )) = \theta_0 + \thet
 $$\text{Selection Model}:  P(S=1 \vert D, W; \phi )$$
 $$\text{Sensitivity/Observation Model}: \text{logit}(P(D^*=1 \vert D=1, S=1, X; \beta)) = \beta_0 + \beta_X X $$
 
-## Simulate Data
+## Simulate data
 
 We start our exploration by simulating some binary data subject to
 misclassification of the outcome and selection bias. Variables related to
@@ -140,13 +142,12 @@ fitBeta  <- glm(Dstar ~ X, binomial(), data = data.samp)
 fitTheta <- glm(Dstar ~ Z, binomial(), data = data.samp)
 ```
 
-## Estimating Sensitivity
+## Estimating sensitivity
 
-In Beesley and Mukherjee (2020) (*UNDER REVIEW*), we develop several strategies
-for estimating sensitivity as a function of covariates X. Here, we apply
-several of the proposed strategies.
+In our paper, we develop several strategies
+for estimating either marginal sensitivity or sensitivity as a function of covariates X. Here, we apply several of the proposed strategies.
 
-```{r}
+```{r, results='hide', message=F}
 # Using marginal sampling ratio r and P(D=1)
 sens1 <- sensitivity(data.samp$Dstar, data.samp$X, mean(data$D),
                       r = r.marg.true)
@@ -169,7 +170,7 @@ We propose several strategies for estimating the association between D and Z
 from a logistic regression model in the presence of different biasing factors.
 Below, we provide code for implementing these methods.
 
-```{r}
+```{r, results='hide'}
 # Approximation of D*|Z
 approx1 <- approxdist(data.samp$Dstar, data.samp$Z, sens1$c_marg,
                       weights = weights)
@@ -180,17 +181,24 @@ nonlog1 <- nonlogistic(data.samp$Dstar, data.samp$Z, c_X = sens3$c_X,
 
 # Direct observed data likelihood maximization without fixed intercept
 start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
-fit <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
+fit1 <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
                  weights = weights)
-
-obsloglik1 <- list(param = fit$param, variance = diag(fit$var))
+obsloglik1 <- list(param = fit1$param, variance = diag(fit1$variance))
 
 # Direct observed data likelihood maximization with fixed intercept
-start <- c(coef(fitTheta), logit(sens1$c_marg), coef(fitBeta)[2])
-fit   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
+fit2   <- obsloglik(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
                  beta0_fixed = logit(sens1$c_marg), weights = weights)
+obsloglik2 <- list(param = fit2$param, variance = diag(fit2$variance))
 
-obsloglik2 <- list(param = fit$param, variance = diag(fit$var))
+# Expectation-maximization algorithm without fixed intercept
+fit3 <- obsloglikEM(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
+                 weights = weights)
+obsloglik3 <- list(param = fit3$param, variance = diag(fit3$variance))
+
+# Expectation-maximization algorithm with fixed intercept
+fit4 <- obsloglikEM(data.samp$Dstar, data.samp$Z, data.samp$X, start = start,
+                  beta0_fixed = logit(sens1$c_marg), weights = weights)
+obsloglik4 <- list(param = fit4$param, variance = diag(fit4$variance))
 ```
 ## Plotting sensitivity estimates
 
@@ -217,7 +225,7 @@ different marginal sampling ratio values. In reality, we will rarely know the
 truth, and this strategy can help us obtain reasonable values for sensitivity
 across plausible sampling ratio values.
 
-```{r, echo = FALSE, eval = TRUE,  fig.width = 5, fig.height= 5,  results='hide'}
+```{r, echo = FALSE, eval = TRUE,  fig.width = 5, fig.height= 5,  results='hide', message=F}
 rvals = c(1,1.5,2,2.5,5,10)
 COL = c('red', 'orange', 'yellow', 'green', 'blue', 'purple')
 true_prevs = predict(trueX, newdata = data.samp, type = 'response')
@@ -235,13 +243,38 @@ legend(x='topleft', legend = c(rvals, 'Truth'), title = 'Sampling Ratio',
 
 
 
+## Evaluating observed data log-likelihood maximization
+
+**Figure 4** shows the maximized log-likelihood values for fixed values of $\beta_0$ obtained using direct maximization of the observed data log-likelihood. The provide likelihood does an excellent job at recovering the true value of $\beta_0$.
+
+**Figure 5** shows the log-likelihood values across iterations of the expectation-maximization algorithm estimation method when we do and do not fix $\beta_0$. We see faster and cleaner convergence to the MLE when we fix the intercept $\beta_0$.
+
+```{r, echo = FALSE, eval = TRUE,  fig.width = 5, fig.height= 5}
+plot(fit1$beta0_fixed, fit1$loglik.seq, xlab = 'Beta_0', ylab = 'Log-likelihood',
+     main = 'Figure 4: Profile Log-Likelihood Values \n for Direct Maximization', pch = 16)
+abline(v=-0.4, col = 'blue', lwd = 2)
+points(logit(sens1$c_marg), fit2$loglik.seq, pch = 17, col = 'red')
+legend(x='topright', legend = c('No fixed beta_0', 'Fixed beta_0'), col = c('black', 'red'), pch = c(16,17))
+text(x=-0.1, y=mean(fit1$loglik.seq),label = 'True beta_0', srt = 90)
+
+plot(fit3$loglik.seq[-c(1)], xlab = 'EM algorithm iteration', ylab = 'Log-likelihood',
+     main = 'Figure 5: Log-Likelihood Values \n Across EM Iterations', pch = 16)
+points(fit4$loglik.seq[-c(1)], pch = 17, col = 'red')
+legend(x='bottomright', legend = c('No fixed beta_0', 'Fixed beta_0'), pch = c(16,17),
+       col = c('black', 'red'))
+```
+
+
+
+
+
 ## Plotting log-odds ratio estimates
 ```{r, echo = FALSE, eval = TRUE,  fig.width = 7, fig.height= 4, message=FALSE}
 library(ggplot2)
 library(scales)
 ```
 
-**Figure 4** shows the estimated log-odds ratio relating $D$ and $Z$ for the
+**Figure 6** shows the estimated log-odds ratio relating $D$ and $Z$ for the
 various analysis methods. Uncorrected (complete case with misclassified outcome)
 analysis produces bias, and some methods reduce this bias. Recall, this is a
 single simulated dataset, and the corrected estimators may not always equal
@@ -260,7 +293,7 @@ a <- ggplot(data = data.frame(METHODS = METHODS, PARAM = PARAM, VARIANCE = VARIA
            col = METHODS,x = METHODS, y = PARAM)) +
   geom_point(position = position_dodge(.7), size = 2) +
   geom_linerange(position = position_dodge(.7), size = 1.2) +
-  xlab('') + ylab('logOR')+ggtitle('Figure 4: Estimated Log-Odds Ratio Across Methods')+
+  xlab('') + ylab('logOR')+ggtitle('Figure 6: Estimated Log-Odds Ratio Across Methods')+
   scale_x_discrete(limits=METHODS)+
   geom_hline(yintercept = PARAM[1], linetype = 1, color = 'black')+
   guides(fill=guide_legend(nrow=2,byrow=TRUE))+

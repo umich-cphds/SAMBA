@@ -2,8 +2,8 @@
 % Please edit documentation in R/nonlogistic.R
 \name{nonlogistic}
 \alias{nonlogistic}
-\title{Estimate parameters in the disease model given a previously-estimated
-sensitivity.}
+\title{Estimate parameters in the disease model given sensitivity as a function of
+covariates.}
 \usage{
 nonlogistic(Dstar, Z, c_X, weights = NULL)
 }
@@ -13,19 +13,20 @@ coded as 0/1}
 
 \item{Z}{numeric matrix of covariates in disease model}
 
-\item{c_X}{sensitivity as a function of X, P(D^* | D, X)}
+\item{weights}{Optional numeric vector of patient-specific weights used for
+selection bias adjustment. Default is NULL}
 
-\item{weights}{(optional) vector of subject-specific weights used for
-selection bias adjustment.}
+\item{c_marg}{marginal sensitivity, P(D* = 1 | D = 1, S = 1)}
 }
 \value{
-A list with two elements: 'param', a vector with parameter estimates
-    for disease model(intercept, logOR of Z), and 'variance', a vector of
-    variance estimates for disease model
+a list with two elements: (1) 'param', a vector with parameter
+    estimates for disease model (logOR of Z), and (2) 'variance', a vector of
+    variance estimates for disease model parameters. Results do not include
+    intercept.
 }
 \description{
-\code{nonlogistic} fits a logistic regression model for D given Z using a
-non-logistic link function for Dstar given Z and sensitivity.
+non-logistic link function for D* given Z and sensitivity. This function
+assumes that sensitivity as a function of X is known or has been estimated
 }
 \details{
 We are interested in modeling the relationship between binary disease status
@@ -37,8 +38,8 @@ using the following modeling framework.
 Notation:
 \describe{
     \item{D}{Binary disease status of interest.}
-    \item{Dstar}{Observed binary disease status. Potentially a misclassified
-                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{D*}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies D* = 0.}
     \item{S}{Indicator for whether patient from population of interest is
              included in the analytical dataset.}
     \item{Z}{Covariates in disease model of interest.}
@@ -51,6 +52,6 @@ Model Structure:
 \describe{
 \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
-\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+\item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 }
 }

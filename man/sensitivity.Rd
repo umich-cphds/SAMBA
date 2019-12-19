@@ -2,7 +2,7 @@
 % Please edit documentation in R/sensitivity.R
 \name{sensitivity}
 \alias{sensitivity}
-\title{sensitivity}
+\title{Estimate sensitivity}
 \usage{
 sensitivity(Dstar, X, prev, r = NULL, weights = NULL)
 }
@@ -14,23 +14,24 @@ coded as 0/1}
 to fit model with no covariates in sensitivity model. 'X' should not
 contain an intercept}
 
-\item{prev}{Disease prevalence in the population or subject-specific
-\eqn{P(D|X)} in population}
+\item{prev}{marginal disease prevalence \eqn{P(D = 1)} or patient-specific
+\eqn{P(D = 1|X)} in population}
 
-\item{r}{Optional marginal sampling ratio, \eqn{P(S| D) / P(S| !D)}. Only
-one of 'r' and 'weights' can be specified. Default is `NULL`}
+\item{r}{(optional) marginal sampling ratio, \eqn{P(S = 1|D = 1) / P(S = 1|D = 0)}.
+Only one of 'r' and 'weights' can be specified. Default is `NULL`}
 
-\item{weights}{Optional vector of subject-specific weights used for
+\item{weights}{Optional vector of patient-specific weights used for
 selection bias adjustment. Only one of r and weights can be specified.
 Default is `NULL`}
 }
 \value{
-A list with two elements: `c_marg`, marginal sensitivity estimate
-\eqn{P(D^*| D)} and `c_X`, sensitivity as a function of X, \eqn{P(D^*| D, X)}
+a list with two elements: (1) `c_marg`, marginal sensitivity estimate
+    \eqn{P(D* = 1|D = 1, S = 1)}, and (2) `c_X`, sensitivity as a function of
+    X \eqn{P(D* = 1| D = 1, S = 1, X)}
 }
 \description{
-\code{sensitivity} estimates the marginal sensitivity and sensitivity as a function of
-covariates X for a misclassified binary outcome.
+\code{sensitivity} estimates (1) marginal sensitivity and (2) sensitivity as
+a function of covariates X for a misclassified binary outcome.
 }
 \details{
 We are interested in modeling the relationship between binary disease status
@@ -42,8 +43,8 @@ disease model using the following modeling framework.
 Notation:
 \describe{
     \item{D}{Binary disease status of interest.}
-    \item{Dstar}{Observed binary disease status. Potentially a misclassified
-                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{D*}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies D* = 0.}
     \item{S}{Indicator for whether patient from population of interest is
              included in the analytical dataset.}
     \item{Z}{Covariates in disease model of interest.}
@@ -56,6 +57,6 @@ Model Structure:
 \describe{
 \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
-\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+\item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 }
 }

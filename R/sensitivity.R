@@ -1,7 +1,7 @@
-#' sensitivity
+#' Estimate sensitivity
 #'
-#' \code{sensitivity} estimates the marginal sensitivity and sensitivity as a function of
-#' covariates X for a misclassified binary outcome.
+#' \code{sensitivity} estimates (1) marginal sensitivity and (2) sensitivity as
+#' a function of covariates X for a misclassified binary outcome.
 #'
 #' We are interested in modeling the relationship between binary disease status
 #' and covariates \eqn{Z} using a logistic regression model. However, \eqn{D}
@@ -12,8 +12,8 @@
 #' Notation:
 #' \describe{
 #'     \item{D}{Binary disease status of interest.}
-#'     \item{Dstar}{Observed binary disease status. Potentially a misclassified
-#'                  version of D. We assume D = 0 implies Dstar = 0.}
+#'     \item{D*}{Observed binary disease status. Potentially a misclassified
+#'                  version of D. We assume D = 0 implies D* = 0.}
 #'     \item{S}{Indicator for whether patient from population of interest is
 #'              included in the analytical dataset.}
 #'     \item{Z}{Covariates in disease model of interest.}
@@ -26,22 +26,23 @@
 #' \describe{
 #' \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
-#' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+#' \item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 #' }
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
 #' @param X Numeric matrix with covariates in sensitivity model. Set to NULL
 #'     to fit model with no covariates in sensitivity model. 'X' should not
 #'     contain an intercept
-#' @param prev Disease prevalence in the population or subject-specific
-#'     \eqn{P(D|X)} in population
-#' @param r Optional marginal sampling ratio, \eqn{P(S| D) / P(S| !D)}. Only
-#'     one of 'r' and 'weights' can be specified. Default is `NULL`
-#' @param weights Optional vector of subject-specific weights used for
+#' @param prev marginal disease prevalence \eqn{P(D = 1)} or patient-specific
+#'     \eqn{P(D = 1|X)} in population
+#' @param r (optional) marginal sampling ratio, \eqn{P(S = 1|D = 1) / P(S = 1|D = 0)}.
+#'     Only one of 'r' and 'weights' can be specified. Default is `NULL`
+#' @param weights Optional vector of patient-specific weights used for
 #'     selection bias adjustment. Only one of r and weights can be specified.
 #'     Default is `NULL`
-#' @return A list with two elements: `c_marg`, marginal sensitivity estimate
-#' \eqn{P(D^*| D)} and `c_X`, sensitivity as a function of X, \eqn{P(D^*| D, X)}
+#' @return a list with two elements: (1) `c_marg`, marginal sensitivity estimate
+#'     \eqn{P(D* = 1|D = 1, S = 1)}, and (2) `c_X`, sensitivity as a function of
+#'     X \eqn{P(D* = 1| D = 1, S = 1, X)}
 #' @export
 sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 {
@@ -52,6 +53,8 @@ sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 
     n <- length(Dstar)
     if (!is.null(X)) {
+        if (is.data.frame(X))
+            X <- as.matrix(X)
         if (!is.numeric(X))
             stop("'X' must be numeric.")
         if (is.vector(X))
@@ -72,11 +75,11 @@ sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
         message('Using average prevalence to calculate marginal c')
 
     if (!is.null(r) && !is.null(weights))
-        stop("Only one of 'r' and weights can be non NULL.")
+        stop("Only one of 'r' and weights can be non-NULL.")
 
     check.weights(weights, n)
     if (is.null(weights))
-        weights <- rep(1 / n, n)
+        weights <- rep(1, n)
 
     if (is.null(r)) {
         r <- 1
@@ -89,7 +92,8 @@ sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 
     p.star <- sum(Dstar * weights) / sum(weights)
     prevr  <- r * prev / (r * prev + 1 - prev)
-    c_marg <- p.star / mean(prevr)
+    c_marg <- p.star / (r * mean(prev) / (r * mean(prev) + 1 - mean(prev)))
+
     c_marg <- ifelse(c_marg > 1, 1, c_marg)
 
     fit.beta  <- stats::glm(Dstar ~ X, family = stats::binomial(),

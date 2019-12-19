@@ -1,9 +1,9 @@
-#' Estimate parameters in the disease model given a previously-estimated
-#' sensitivity.
+#' Estimate parameters in the disease model approximating the observed data
+#' distribution
 #'
-#' \code{approxdist} can be used to estimate parameters in the disease model
-#' given a previously-estimated marginal sensitivity. This estimation is based
-#' on approximating the distribution of Dstar given Z.
+#' \code{approxdist} estimates parameters in the disease model given
+#' a previously-estimated marginal sensitivity. This estimation is based on
+#' approximating the distribution of D* given Z.
 #'
 #' We are interested in modeling the relationship between binary disease status
 #' and covariates Z using a logistic regression model. However, D may be
@@ -14,8 +14,8 @@
 #' Notation:
 #' \describe{
 #'     \item{D}{Binary disease status of interest.}
-#'     \item{Dstar}{Observed binary disease status. Potentially a misclassified
-#'                  version of D. We assume D = 0 implies Dstar = 0.}
+#'     \item{D*}{Observed binary disease status. Potentially a misclassified
+#'                  version of D. We assume D = 0 implies D* = 0.}
 #'     \item{S}{Indicator for whether patient from population of interest is
 #'              included in the analytical dataset.}
 #'     \item{Z}{Covariates in disease model of interest.}
@@ -28,17 +28,18 @@
 #' \describe{
 #' \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 #' \item{Selection Model}{\deqn{P(S=1|W,D)}}
-#' \item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+#' \item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 #' }
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
 #' @param Z Numeric matrix of covariates in disease model
-#' @param weights Optional vector of subject-specific weights used for
+#' @param weights Optional numeric vector of patient-specific weights used for
 #'     selection bias adjustment. Default is NULL
-#' @param c_marg Marginal sensitivity, P(D^* | D)
-#' @return A list with two elements: 'param', a vector with parameter estimates
-#'     for disease model(intercept, logOR of Z), and 'variance', a vector of
-#'     variance estimates for disease model
+#' @param c_marg marginal sensitivity, P(D* = 1 | D = 1, S = 1)
+#' @return a list with two elements: (1) 'param', a vector with parameter
+#'     estimates for disease model (logOR of Z), and (2) 'variance', a vector of
+#'     variance estimates for disease model parameters. Results do not include
+#'     intercept.
 #' @export
 approxdist <- function(Dstar, Z, c_marg, weights = NULL)
 {
@@ -65,7 +66,7 @@ approxdist <- function(Dstar, Z, c_marg, weights = NULL)
 
     check.weights(weights, n)
     if (is.null(weights))
-        weights <- rep(1 / n, n)
+        weights <- rep(1, n)
 
     if (length(unique(weights)) == 1) {
         fit <- stats::glm(Dstar ~ Z, family = stats::binomial())
@@ -85,5 +86,5 @@ approxdist <- function(Dstar, Z, c_marg, weights = NULL)
     p.star     <- sum(Dstar * weights) / sum(weights)
     correction <- (c_marg * (1 - p.star)) / (c_marg - p.star)
 
-    list(param = param.uc * correction, variance = var.uc * correction ^ 2)
+    list(param = param.uc * correction, variance = var.uc * (correction ^ 2))
 }

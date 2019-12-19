@@ -2,7 +2,8 @@
 % Please edit documentation in R/obsloglik.R
 \name{obsloglik}
 \alias{obsloglik}
-\title{Joinly estimate the disease and sensitivity models via profile likelihood}
+\title{Estimate parameters in the disease model using observed data log-likelihood
+using direct maximization.}
 \usage{
 obsloglik(Dstar, Z, X, start, beta0_fixed = NULL, weights = NULL,
   expected = TRUE, itnmax = 5000)
@@ -24,7 +25,7 @@ of the sensitivity model}
 intercept to profile over. If a single value, corresponds to fixing
 intercept at specified value. Default is NULL}
 
-\item{weights}{Optional vector of subject-specific weights used for
+\item{weights}{Optional vector of patient-specific weights used for
 selection bias adjustment. Default is NULL}
 
 \item{expected}{Whether or not to calculate the covariance matrix via the
@@ -34,14 +35,15 @@ expected fisher information matrix. Default is TRUE}
 }
 \value{
 A "SAMBA.fit" object with nine elements: 'param', the maximum
-likelihood estimate of the coeficients,  'var', the covariance matrix of the
-final estimate, param.seq', the sequence of estimates at each value of beta0,
-and 'loglik.seq', the log likelihood at each value. The rest of the elements
-are Dstar', 'X', 'Z', and 'weights'.
+likelihood estimate of the coeficients,  'variance', the covariance matrix of
+the final estimate, param.seq', the sequence of estimates at each value of
+beta0, and 'loglik.seq', the log likelihood at each value. The rest of the
+elements are Dstar', 'X', 'Z', and 'weights'.
 }
 \description{
 \code{obsloglik} jointly estimates the disease model and sensitivity
-model parameters using profile likelihood methods.
+model parameters using profile likelihood methods. Estimation involves
+direct maximization of the observed data log-likelihood.
 }
 \details{
 We are interested in modeling the relationship between binary disease status
@@ -52,8 +54,8 @@ using the following modeling framework.
 Notation:
 \describe{
     \item{D}{Binary disease status of interest.}
-    \item{Dstar}{Observed binary disease status. Potentially a misclassified
-                 version of D. We assume D = 0 implies Dstar = 0.}
+    \item{D*}{Observed binary disease status. Potentially a misclassified
+                 version of D. We assume D = 0 implies D* = 0.}
     \item{S}{Indicator for whether patient from population of interest is
              included in the analytical dataset.}
     \item{Z}{Covariates in disease model of interest.}
@@ -66,6 +68,6 @@ Model Structure:
 \describe{
 \item{Disease Model}{\deqn{logit(P(D=1|X)) = theta_0 + theta_Z Z}}
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
-\item{Sensitivity Model}{\deqn{logit(P(D^*=1|D=1,X)) = beta_0 + beta_X X}}
+\item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 }
 }

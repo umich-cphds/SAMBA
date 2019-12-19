@@ -141,8 +141,8 @@ obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
         if (abs(loglik.seq[it] - loglik.seq[it - 1]) < tol)
             converged <- TRUE
 
-        p <- c(stats::coef(fit.theta), stats::coef(fit.beta))
-        param.seq <- rbind(param.seq,  p)
+        par <- c(stats::coef(fit.theta), stats::coef(fit.beta))
+        param.seq <- rbind(param.seq,  par)
     }
 
     param <- c(stats::coef(fit.theta), beta0_fixed, stats::coef(fit.beta))
@@ -158,6 +158,6 @@ obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
 
     structure(list(param = param, variance = var, param.seq = param.seq,
                    loglik.seq = loglik.seq, Dstar = Dstar, X = X, Z = Z,
-                   weights = weights, beta0_fixed = values),
+                   weights = weights, beta0_fixed = beta0_fixed),
               class = "SAMBA.fit")
 }

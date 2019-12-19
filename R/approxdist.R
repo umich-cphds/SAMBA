@@ -40,6 +40,22 @@
 #'     estimates for disease model (logOR of Z), and (2) 'variance', a vector of
 #'     variance estimates for disease model parameters. Results do not include
 #'     intercept.
+#' @examples
+#' library(SAMBA)
+#' # These examples are generated from the vignette. See it for more details.
+#'
+#' # Generate IPW weights from the true model
+#' expit <- function(x) exp(x) / (1 + exp(x))
+#' prob.WD <- expit(-0.6 + 1 * samba.df$D + 0.5 * samba.df$W)
+#' weights <- nrow(samba.df) * (1  / prob.WD) / (sum(1 / prob.WD))
+#'
+#' # Estimate sensitivity by using inverse probability of selection weights
+#' # and P(D=1)
+#' sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
+#'                     weights = weights)
+#'
+#' approx1 <- approxdist(samba.df$Dstar, samba.df$Z, sens$c_marg,
+#'                      weights = weights)
 #' @export
 approxdist <- function(Dstar, Z, c_marg, weights = NULL)
 {

@@ -1,6 +1,6 @@
 Package: SAMBA
 Title: Selection and Misclassification Bias Adjustment for Logistic Regression Models
-Version: 0.4.9
+Version: 0.5.0
 Authors@R: c(
     person("Alexander", "Rix", email = "alexrix@umich.edu", role = "cre"),
     person("Lauren", "Beesley", email = "lbeesley@umich.edu", role = "aut")

@@ -31,12 +31,14 @@
 #' }
 #' @param Dstar Numeric vector containing observed disease status. Should be
 #'     coded as 0/1
-#' @param Z Numeric matrix of covariates in disease model
-#' @param X Numeric Matrix of covariates in sensitivity model. Set to
-#'     NULL to fit model with no covariates in sensitivity model
-#' @param start Numeric vector of starting values for theta and beta (theta, beta).
-#'     Theta is the parameter of the disease model, and beta is the parameter
-#'     of the sensitivity model
+#' @param Z Numeric matrix of covariates in disease model. 'Z' should not
+#'     contain an intercept
+#' @param X Numeric matrix of covariates in sensitivity model. Set to
+#'     NULL to fit model with no covariates in sensitivity model. 'X' should not
+#'     contain an intercept
+#' @param start Numeric vector of starting values for theta and beta
+#'     (theta, beta). Theta is the parameter of the disease model, and beta is
+#'     the parameter of the sensitivity model
 #' @param beta0_fixed Optional numeric vector of values of sensitivity model
 #'     intercept to profile over. If a single value, corresponds to fixing
 #'     intercept at specified value. Default is NULL
@@ -50,6 +52,34 @@
 #' the final estimate, param.seq', the sequence of estimates at each value of
 #' beta0, and 'loglik.seq', the log likelihood at each value. The rest of the
 #' elements are Dstar', 'X', 'Z', and 'weights'.
+#' @examples
+#' library(SAMBA)
+#' # These examples are generated from the vignette. See it for more details.
+#'
+#' # Generate IPW weights from the true model
+#' expit <- function(x) exp(x) / (1 + exp(x))
+#' prob.WD <- expit(-0.6 + 1 * samba.df$D + 0.5 * samba.df$W)
+#' weights <- nrow(samba.df) * (1  / prob.WD) / (sum(1 / prob.WD))
+#'
+#' # Get initial parameter estimates
+#' logit <- function(x) log(x / (1 - x))
+#' fitBeta  <- glm(Dstar ~ X, binomial(), data = samba.df)
+#' fitTheta <- glm(Dstar ~ Z, binomial(), data = samba.df)
+#'
+#' sens <- sensitivity(samba.df$Dstar, samba.df$X, mean(samba.df$D), r = 2)
+#' start <- c(coef(fitTheta), logit(sens$c_marg), coef(fitBeta)[2])
+#'
+#' # Direct observed data likelihood maximization without fixed intercept
+#' fit1 <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
+#'                  weights = weights)
+#' obsloglik1 <- list(param = fit1$param, variance = diag(fit1$variance))
+#'
+#' # Direct observed data likelihood maximization with fixed intercept
+#' fit2   <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
+#'                  beta0_fixed = logit(sens$c_marg), weights = weights)
+#'
+#' # since beta0 is fixed, its variance is NA
+#' list(param = fit2$param, variance = diag(fit2$variance))
 #' @export
 obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
                           weights = NULL, expected = TRUE, itnmax = 5000)
@@ -122,7 +152,7 @@ obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
 
         start[2 + ncol(Z)] <- val
         opt <- optimx::optimx(start, max_obsloglik, control =
-                              list(maximize = TRUE, save.failures = F, trace = 0),
+                              list(fnscale = -1, save.failures = F, trace = 0),
                               itnmax = itnmax, method = c("BFGS", "Nelder-Mead"),
                               args = list(Z = Z, X = X, Dstar = Dstar, opt =
                                           opt_long, w = w))
@@ -143,7 +173,7 @@ obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,
                                       weights, expected)
     }
 
-    structure(list(param = param, var = var, param.seq = param.seq, loglik.seq =
+    structure(list(param = param, variance = var, param.seq = param.seq, loglik.seq =
                    loglik.seq, Dstar = Dstar, X = X, Z = Z, weights = weights,
                    beta0_fixed = values), class = "SAMBA.fit")
 }

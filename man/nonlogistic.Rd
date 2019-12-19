@@ -13,10 +13,10 @@ coded as 0/1}
 
 \item{Z}{numeric matrix of covariates in disease model}
 
+\item{c_X}{sensitivity as a function of X, P(D* = 1| D = 1, S = 1, X)}
+
 \item{weights}{Optional numeric vector of patient-specific weights used for
 selection bias adjustment. Default is NULL}
-
-\item{c_marg}{marginal sensitivity, P(D* = 1 | D = 1, S = 1)}
 }
 \value{
 a list with two elements: (1) 'param', a vector with parameter
@@ -54,4 +54,21 @@ Model Structure:
 \item{Selection Model}{\deqn{P(S=1|W,D)}}
 \item{Sensitivity Model}{\deqn{logit(P(D* = 1| D = 1, S = 1, X)) = beta_0 + beta_X X}}
 }
+}
+\examples{
+library(SAMBA)
+# These examples are generated from the vignette. See it for more details.
+
+# Generate IPW weights from the true model
+expit <- function(x) exp(x) / (1 + exp(x))
+prob.WD <- expit(-0.6 + 1 * samba.df$D + 0.5 * samba.df$W)
+weights <- nrow(samba.df) * (1  / prob.WD) / (sum(1 / prob.WD))
+
+# Estimate sensitivity by using inverse probability of selection weights
+# and P(D=1)
+sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
+                    weights = weights)
+
+nonlog1 <- nonlogistic(samba.df$Dstar, samba.df$Z, c_X = sens$c_X,
+                       weights = weights)
 }

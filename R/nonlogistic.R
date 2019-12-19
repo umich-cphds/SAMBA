@@ -34,11 +34,27 @@
 #' @param Z numeric matrix of covariates in disease model
 #' @param weights Optional numeric vector of patient-specific weights used for
 #'     selection bias adjustment. Default is NULL
-#' @param c_marg marginal sensitivity, P(D* = 1 | D = 1, S = 1)
+#' @param c_X sensitivity as a function of X, P(D* = 1| D = 1, S = 1, X)
 #' @return a list with two elements: (1) 'param', a vector with parameter
 #'     estimates for disease model (logOR of Z), and (2) 'variance', a vector of
 #'     variance estimates for disease model parameters. Results do not include
 #'     intercept.
+#' @examples
+#' library(SAMBA)
+#' # These examples are generated from the vignette. See it for more details.
+#'
+#' # Generate IPW weights from the true model
+#' expit <- function(x) exp(x) / (1 + exp(x))
+#' prob.WD <- expit(-0.6 + 1 * samba.df$D + 0.5 * samba.df$W)
+#' weights <- nrow(samba.df) * (1  / prob.WD) / (sum(1 / prob.WD))
+#'
+#' # Estimate sensitivity by using inverse probability of selection weights
+#' # and P(D=1)
+#' sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
+#'                     weights = weights)
+#'
+#' nonlog1 <- nonlogistic(samba.df$Dstar, samba.df$Z, c_X = sens$c_X,
+#'                        weights = weights)
 #' @export
 nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
 {
@@ -68,9 +84,9 @@ nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
     check.weights(weights, n)
 
     fitTheta <- stats::glm(Dstar ~ Z, family = stats::binomial())
-    starting <- stats::coef(fitTheta)
+    start <- stats::coef(fitTheta)
     if (is.null(weights)) {
-        fit <- stats::glm(Dstar ~ Z, start = starting, family =
+        fit <- stats::glm(Dstar ~ Z, start = start, family =
                           stats::binomial(modLink(c_X)))
 
         var <- diag(summary(fit)$cov.scaled)
@@ -84,7 +100,7 @@ nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
         form <- paste("Dstar ~", paste(colnames(Z), collapse = "+"))
         fit  <- survey::svyglm(stats::formula(form), design = design,
                                family = stats::binomial(modLink(c_X)),
-                               start = stats::coef(fitTheta))
+                               start = start)
 
         var <- diag(stats::vcov(fit))
     }

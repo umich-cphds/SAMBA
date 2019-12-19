@@ -43,6 +43,21 @@
 #' @return a list with two elements: (1) `c_marg`, marginal sensitivity estimate
 #'     \eqn{P(D* = 1|D = 1, S = 1)}, and (2) `c_X`, sensitivity as a function of
 #'     X \eqn{P(D* = 1| D = 1, S = 1, X)}
+#' @examples
+#' library(SAMBA)
+#' # These examples are generated from the vignette. See it for more details.
+#'
+#' # Generate IPW weights from the true model
+#' expit <- function(x) exp(x) / (1 + exp(x))
+#' prob.WD <- expit(-0.6 + 1 * samba.df$D + 0.5 * samba.df$W)
+#' weights <- nrow(samba.df) * (1  / prob.WD) / (sum(1 / prob.WD))
+#'
+#' # Using marginal sampling ratio r ~ 2 and P(D=1)
+#' sens <- sensitivity(samba.df$Dstar, samba.df$X, mean(samba.df$D),
+#'                     r = 2)
+#' # Using inverse probability of selection weights and P(D=1)
+#' sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
+#'                     weights = weights)
 #' @export
 sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 {

@@ -25,7 +25,7 @@ this estimation approach and instead focus on implementation. For additional
 details about the estimation algorithm, we refer the reader to ``Statistical
 inference for association studies using electronic health records: handling both
 selection bias and outcome misclassification'' by Lauren J Beesley and
-Bhramar Mukherjee on bioRXiv.
+Bhramar Mukherjee on MedRvix.
 
 
 ## Model structure
@@ -302,3 +302,9 @@ a <- ggplot(data = data.frame(METHODS = METHODS, PARAM = PARAM, VARIANCE = VARIA
         axis.text.x=element_text(angle=20,hjust=1,vjust=1), text = element_text(size=12))
 print(a)
 ```
+
+## Reference
+Statistical inference for association studies using electronic health records:
+handling both selection bias and outcome misclassification
+Lauren J Beesley, Bhramar Mukherjee
+medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}

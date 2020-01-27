@@ -1,6 +1,6 @@
 Package: SAMBA
 Title: Selection and Misclassification Bias Adjustment for Logistic Regression Models
-Version: 0.5.0
+Version: 0.9.0
 Authors@R: c(
     person("Alexander", "Rix", email = "alexrix@umich.edu", role = "cre"),
     person("Lauren", "Beesley", email = "lbeesley@umich.edu", role = "aut")
@@ -14,7 +14,7 @@ Description:
     binary disease status and predictors modeled using a logistic regression
     model. SAMBA implements several methods for obtaining bias-corrected
     point estimates along with valid standard errors as proposed in Beesley and
-    Mukherjee (2020), currently under review.
+    Mukherjee (2020) <doi:10.1101/2019.12.26.19015859>, currently under review.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

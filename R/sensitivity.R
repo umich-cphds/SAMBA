@@ -58,6 +58,11 @@
 #' # Using inverse probability of selection weights and P(D=1)
 #' sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
 #'                     weights = weights)
+#' @references
+#' Statistical inference for association studies using electronic health records:
+#' handling both selection bias and outcome misclassification
+#' Lauren J Beesley, Bhramar Mukherjee
+#' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
 {

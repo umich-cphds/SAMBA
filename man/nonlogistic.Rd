@@ -72,3 +72,9 @@ sens <- sensitivity(samba.df$Dstar, samba.df$X, prev = mean(samba.df$D),
 nonlog1 <- nonlogistic(samba.df$Dstar, samba.df$Z, c_X = sens$c_X,
                        weights = weights)
 }
+\references{
+Statistical inference for association studies using electronic health records:
+handling both selection bias and outcome misclassification
+Lauren J Beesley, Bhramar Mukherjee
+medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
+}

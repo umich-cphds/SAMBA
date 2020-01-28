@@ -91,16 +91,19 @@ sens <- sensitivity(samba.df$Dstar, samba.df$X, mean(samba.df$D), r = 2)
 start <- c(coef(fitTheta), logit(sens$c_marg), coef(fitBeta)[2])
 
 # Direct observed data likelihood maximization without fixed intercept
+\dontrun{
 fit1 <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
                  weights = weights)
 obsloglik1 <- list(param = fit1$param, variance = diag(fit1$variance))
-
+}
 # Direct observed data likelihood maximization with fixed intercept
+\dontrun{
 fit2   <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
                  beta0_fixed = logit(sens$c_marg), weights = weights)
 
 # since beta0 is fixed, its variance is NA
-list(param = fit2$param, variance = diag(fit2$variance))
+obsloglik1 <- list(param = fit2$param, variance = diag(fit2$variance))
+}
 }
 \references{
 Statistical inference for association studies using electronic health records:

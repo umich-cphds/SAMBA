@@ -61,7 +61,7 @@
 #' @references
 #' Statistical inference for association studies using electronic health records:
 #' handling both selection bias and outcome misclassification
-#' Lauren J Beesley, Bhramar Mukherjee
+#' Lauren J Beesley and Bhramar Mukherjee
 #' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
@@ -113,17 +113,18 @@ sensitivity <- function(Dstar, X, prev, r = NULL, weights = NULL)
     p.star <- sum(Dstar * weights) / sum(weights)
     prevr  <- r * prev / (r * prev + 1 - prev)
     c_marg <- p.star / (r * mean(prev) / (r * mean(prev) + 1 - mean(prev)))
-
     c_marg <- ifelse(c_marg > 1, 1, c_marg)
 
+    suppressWarnings({
     fit.beta  <- stats::glm(Dstar ~ X, family = stats::binomial(),
                             weights = weights)
+    })
 
     starting <- c(logit(c_marg), stats::coef(fit.beta)[-1])
-    fit.sens <- try(stats::glm(Dstar ~ X, start = starting, weights = weights,
-                               family = stats::binomial(modLinkprev(prevr))),
-                    silent = TRUE)
-
+    fit.sens <- try(suppressWarnings(
+                    stats::glm(Dstar ~ X, start = starting, weights = weights,
+                               family = stats::binomial(modLinkprev(prevr)))
+                    ), silent = TRUE)
     if (class(fit.sens)[1] != "try-error") {
         c1 <- expit(cbind(1, X) %*% stats::coef(fit.sens))
     } else {

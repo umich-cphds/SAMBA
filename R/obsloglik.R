@@ -83,7 +83,7 @@
 #' @references
 #' Statistical inference for association studies using electronic health records:
 #' handling both selection bias and outcome misclassification
-#' Lauren J Beesley, Bhramar Mukherjee
+#' Lauren J Beesley and Bhramar Mukherjee
 #' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 obsloglik <- function(Dstar, Z, X, start, beta0_fixed = NULL,

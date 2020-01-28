@@ -58,7 +58,7 @@
 #' @references
 #' Statistical inference for association studies using electronic health records:
 #' handling both selection bias and outcome misclassification
-#' Lauren J Beesley, Bhramar Mukherjee
+#' Lauren J Beesley and Bhramar Mukherjee
 #' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
@@ -103,10 +103,12 @@ nonlogistic <- function(Dstar, Z, c_X, weights = NULL)
                                     weights = weights)
 
         form <- paste("Dstar ~", paste(colnames(Z), collapse = "+"))
+
+        suppressWarnings({
         fit  <- survey::svyglm(stats::formula(form), design = design,
                                family = stats::binomial(modLink(c_X)),
                                start = start)
-
+        })
         var <- diag(stats::vcov(fit))
     }
 

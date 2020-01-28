@@ -59,7 +59,7 @@
 #' @references
 #' Statistical inference for association studies using electronic health records:
 #' handling both selection bias and outcome misclassification
-#' Lauren J Beesley, Bhramar Mukherjee
+#' Lauren J Beesley and Bhramar Mukherjee
 #' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 approxdist <- function(Dstar, Z, c_marg, weights = NULL)
@@ -90,7 +90,9 @@ approxdist <- function(Dstar, Z, c_marg, weights = NULL)
         weights <- rep(1, n)
 
     if (length(unique(weights)) == 1) {
+        suppressWarnings({
         fit <- stats::glm(Dstar ~ Z, family = stats::binomial())
+        })
     } else {
         # estimate using survey package due to weights
         colnames(Z) <- paste0("Z", 1:ncol(Z))
@@ -98,8 +100,11 @@ approxdist <- function(Dstar, Z, c_marg, weights = NULL)
                                       weights = weights)
 
         form <- paste("Dstar ~", paste(colnames(Z), collapse = " + "))
+
+        suppressWarnings({
         fit  <- survey::svyglm(stats::formula(form), family = stats::binomial(),
                                design = design)
+        })
     }
     param.uc <- stats::coef(fit)[-1]
     var.uc   <- diag(summary(fit)$cov.scaled)[-1]

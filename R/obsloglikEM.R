@@ -86,7 +86,7 @@
 #' @references
 #' Statistical inference for association studies using electronic health records:
 #' handling both selection bias and outcome misclassification
-#' Lauren J Beesley, Bhramar Mukherjee
+#' Lauren J Beesley and Bhramar Mukherjee
 #' medRxiv \href{https://doi.org/10.1101/2019.12.26.19015859}{2019.12.26.19015859}
 #' @export
 obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
@@ -153,16 +153,21 @@ obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
     loglik.seq <- -10 ^ 9
     while (!converged && it < maxit) {
         if (is.null(beta0_fixed)) {
+            suppressWarnings({
             fit.beta <- stats::glm(Dstar ~ X, weights = p * w,
                                    family = stats::binomial())
+            })
         } else {
+            suppressWarnings({
             fit.beta <- stats::glm(Dstar ~ 0 + X, weights = p * w,
                                    offset = rep(beta0_fixed, length(p)),
                                    family = stats::binomial())
+            })
         }
+        suppressWarnings({
         fit.theta <- stats::glm(p ~ Z, family = stats::binomial(),
                                 weights = weights)
-
+        })
         pred1 <- stats::predict(fit.theta, type = 'response')
         pred2 <- stats::predict(fit.beta, type = 'response')
         p     <- calculate.p(pred1, pred2)

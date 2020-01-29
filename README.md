@@ -1,6 +1,6 @@
 <!-- badges: start -->
 [![Github
-Version](https://img.shields.io/badge/Github-0.9.0-informational.svg?style=flat)](commits/master)
+Version](https://img.shields.io/badge/Github-0.9.0-informational.svg?style=flat)](https://github.com/umich-cphds/SAMBA)
 [![Travis
 CI](https://travis-ci.org/umich-cphds/SAMBA.svg?branch=master)](https://travis-ci.org/umich-cphds/SAMBA)
 <!-- badges: end -->

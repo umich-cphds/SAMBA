@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 
 ```
 <!-- badges: start -->
-[![Github Version](https://img.shields.io/badge/Github-`r version.github`-`r color`.svg?style=flat)](commits/master)
+[![Github Version](https://img.shields.io/badge/Github-`r version.github`-`r color`.svg?style=flat)](https://github.com/umich-cphds/SAMBA)
 [![Travis CI](https://travis-ci.org/umich-cphds/SAMBA.svg?branch=master)](https://travis-ci.org/umich-cphds/SAMBA)
 <!-- badges: end -->
 

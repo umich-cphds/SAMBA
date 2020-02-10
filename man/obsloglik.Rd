@@ -91,13 +91,13 @@ sens <- sensitivity(samba.df$Dstar, samba.df$X, mean(samba.df$D), r = 2)
 start <- c(coef(fitTheta), logit(sens$c_marg), coef(fitBeta)[2])
 
 # Direct observed data likelihood maximization without fixed intercept
-\dontrun{
+\donttest{
 fit1 <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
                  weights = weights)
 obsloglik1 <- list(param = fit1$param, variance = diag(fit1$variance))
 }
 # Direct observed data likelihood maximization with fixed intercept
-\dontrun{
+\donttest{
 fit2   <- obsloglik(samba.df$Dstar, samba.df$Z, samba.df$X, start = start,
                  beta0_fixed = logit(sens$c_marg), weights = weights)
 

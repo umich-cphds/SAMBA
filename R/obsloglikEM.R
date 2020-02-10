@@ -149,7 +149,7 @@ obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
     it <- 1
     converged <- F
 
-    param.seq  <- c(theta, beta0_fixed, beta)
+    param.seq  <- matrix(c(theta, beta), 1)
     loglik.seq <- -10 ^ 9
     while (!converged && it < maxit) {
         if (is.null(beta0_fixed)) {
@@ -181,8 +181,8 @@ obsloglikEM <- function(Dstar, Z, X, start, beta0_fixed = NULL,
         if (abs(loglik.seq[it] - loglik.seq[it - 1]) < tol)
             converged <- TRUE
 
-        par <- c(stats::coef(fit.theta), stats::coef(fit.beta))
-        param.seq <- rbind(param.seq,  par)
+        par <- c(stats::coef(fit.theta), beta0_fixed, stats::coef(fit.beta))
+        param.seq <- rbind(param.seq, par)
     }
 
     param <- c(stats::coef(fit.theta), beta0_fixed, stats::coef(fit.beta))

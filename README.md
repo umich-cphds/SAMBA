@@ -1,9 +1,10 @@
-<!-- badges: start -->
-[![Github
-Version](https://img.shields.io/badge/Github-0.9.0-informational.svg?style=flat)](https://github.com/umich-cphds/SAMBA)
+<!-- Badges -->
+[![CRAN
+Version](https://img.shields.io/cran/v/mianet?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=SAMBA)
+[![GitHub
+Release](https://img.shields.io/github/v/release/umich-cphds/SAMBA?include_prereleases&label=Github&style=flat-square&color=blue)](https://github.com/umich-cphds/SAMBA)
 [![Travis
-CI](https://travis-ci.org/umich-cphds/SAMBA.svg?branch=master)](https://travis-ci.org/umich-cphds/SAMBA)
-<!-- badges: end -->
+CI](https://img.shields.io/travis/umich-cphds/SAMBA?style=flat-square)](https://travis-ci.org/umich-cphds/SAMBA)
 
 SAMBA
 =====
@@ -22,14 +23,17 @@ review.
 Installation
 ============
 
-`SAMBA` can be downloaded from Github via the R Package `devtools`
+`SAMBA` can be downloaded from CRAN via the R Package `devtools`
+
+    install.packages("SAMBA")
+
+or downloaded from Github via the R Package `devtools`
 
     devtools::install_github("umich-cphds/SAMBA", build_opts = c())
 
-Vignette
-========
-
-Once you have `SAMBA` installed, you can type
+The Github version may contain bug fixes not yet present on CRAN, so if
+you are experiencing issues, you may want to try the Github version of
+the package. \# Vignette Once you have `SAMBA` installed, you can type
 
     vignette("UsingSAMBA")
 

@@ -23,10 +23,10 @@ knitr::opts_chunk$set(
 
 
 ```
-<!-- badges: start -->
-[![Github Version](https://img.shields.io/badge/Github-`r version.github`-`r color`.svg?style=flat)](https://github.com/umich-cphds/SAMBA)
-[![Travis CI](https://travis-ci.org/umich-cphds/SAMBA.svg?branch=master)](https://travis-ci.org/umich-cphds/SAMBA)
-<!-- badges: end -->
+<!-- Badges -->
+[![CRAN Version](https://img.shields.io/cran/v/mianet?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=SAMBA)
+[![GitHub Release](https://img.shields.io/github/v/release/umich-cphds/SAMBA?include_prereleases&label=Github&style=flat-square&color=blue)](https://github.com/umich-cphds/SAMBA)
+[![Travis CI](https://img.shields.io/travis/umich-cphds/SAMBA?style=flat-square)](https://travis-ci.org/umich-cphds/SAMBA)
 
 # SAMBA
 Health research using data from electronic health records (EHR) has gained
@@ -40,11 +40,19 @@ point estimates along with valid standard errors as proposed in Beesley and
 Mukherjee (2020), currently under review.
 
 # Installation
-`SAMBA` can be downloaded from Github via the R Package `devtools`
+
+`SAMBA` can be downloaded from CRAN via the R Package `devtools`
+```{r, eval = F}
+install.packages("SAMBA")
+```
+or downloaded from Github via the R Package `devtools`
 ```{r, eval = F}
 devtools::install_github("umich-cphds/SAMBA", build_opts = c())
 ```
 
+The Github version may contain bug fixes not yet present on CRAN,
+so if you are experiencing issues, you may want to try the Github
+version of the package.
 # Vignette
 Once you have `SAMBA` installed, you can type
 ```r

@@ -41,7 +41,7 @@ Mukherjee (2020), currently under review.
 
 # Installation
 
-`SAMBA` can be downloaded from CRAN via the R Package `devtools`
+`SAMBA` can be downloaded from CRAN
 ```{r, eval = F}
 install.packages("SAMBA")
 ```

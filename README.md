@@ -23,7 +23,7 @@ review.
 Installation
 ============
 
-`SAMBA` can be downloaded from CRAN via the R Package `devtools`
+`SAMBA` can be downloaded from CRAN
 
     install.packages("SAMBA")
 
